@@ -35,8 +35,9 @@ from common.utils import (get_translation,
                     get_inside_box,
                     get_inside_mask,
                     get_closest_vertices,
+                    visible_vertices_cpu,
                     visible_vertices_gpu,
-                    visible_vertices_gpu,
+                    euclid_loss_cpu,
                     euclid_loss_gpu
 )
 
@@ -227,7 +228,7 @@ for image_id in tqdm(image_ids, position=0, desc="Images", disable=not ISATTY):
         # LOSS_AREA[segmentation] -> E
         E_indices_whole = embedding_points_loss_resolution[segmentation_loss_resolution]
 
-        E_indices = E_indices_whole[torso_mask[E_indices_whole]] # here I have the points' indices
+        E_indices = E_indices_whole[torso_mask[E_indices_whole]] # here I have the points' indices reduced to the set belonging to torso (if applied) 
         E_coordinates = segmentation_loss_resolution.nonzero()[torso_mask[E_indices_whole]] # here I have their coordinates
         
         plt.figure(figsize=figsize, dpi=plot_dpi, tight_layout=True)
