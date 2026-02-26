@@ -40,8 +40,8 @@ parser.add_argument('-n', '--number', type=int, required=False, help="Number of 
 args = parser.parse_args()
 
 for i in range(10):
-    if not os.path.exists(str(OUTPUT_ROOT / f"plane_distance_{i}")):
-        OUTPUT_DIR = OUTPUT_ROOT / f"plane_distance_{i}"
+    if not os.path.exists(str(OUTPUT_ROOT / f"precission_fitter_{i}")):
+        OUTPUT_DIR = OUTPUT_ROOT / f"precission_fitter_{i}"
         break
     elif i == 9:
         print("No output directory found, please remove the existing ones or change the output name.")
