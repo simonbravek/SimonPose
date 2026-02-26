@@ -1,0 +1,115 @@
+\documentclass[11pt,a4paper,twoside,openright]{report}
+
+\usepackage[top=25mm,bottom=25mm,right=25mm,left=30mm,head=12.5mm,foot=12.5mm]{geometry}
+\let\openright=\cleardoublepage
+
+\input{macros}
+
+\def\NazevPrace{SimonPose}
+\def\Trida{4.B}
+\def\AutorPrace{Šimon Brávek}
+\def\DatumOdevzdani{2026}
+
+% Vedoucí práce: Jméno a příjmení s~tituly
+\def\Vedouci{Jiří Matas}
+
+% Studijní program a obor
+\def\StudijniProgram{studijní program}
+\def\StudijniObor{studijní obor}
+
+% Text čestného prohlášení
+\def\Prohlaseni{Prohlašuji, že jsem svou práci vypracoval samostatně a použil jsem pouze prameny a literaturu
+uvedené v~seznamu bibliografických záznamů. Nemám žádné námitky proti zpřístupňování této práce v~souladu se
+zákonem č. 121/2000 Sb. o~právu autorském, o~právech souvisejících s~právem autorským a
+o~změně některých zákonů (autorský zákon) ve znění pozdějších předpisů.}
+
+% Text poděkování
+\def\Podekovani{%
+Děkuji Jiřímu Matasovi za skvělou příležitost strávit měsíc v létě na katedře strojového učení a být součástí soudobého výzkumu a za jeho skvělé nápady v tomto oboru. Bezpochyby tato zkušenost formovala mé rozhodnutí studovat obor AI ma MFF UK a propůjčila mi vášeň k nejnovějším technologiím. Děkuji také Matěji Suchánkovi jako člověku, co mě provedl tou nejtěžší asimilací s prácí s grafickými kartami a modely jež jsem používal. Děkuji také lidem z katedry, jež ke mě byli přátelští a v neposlední řadě Igoru Vujovičovi za rozvíjení informatiky na našem gymnáziu i přez mnohé překážku. 
+}
+
+% Abstrakt česky
+\def\Abstrakt{%
+
+}
+
+% Abstrakt anglicky
+\def\AbstraktEN{%
+This work focuses formulating the problems 
+}
+
+% 3 až 5 klíčových slov
+\def\KlicovaSlova{klíčové slovo, další pojem, jiný důležitý termín, a ještě jeden}
+% 3 až 5 klíčových slov anglicky
+\def\KlicovaSlovaEN{keyword, important term, another topic, and another one}
+
+
+\begin{document}
+
+\include{titlepage}
+
+% Obsah
+\setcounter{tocdepth}{2}
+\tableofcontents
+
+\chapter{Teoretická část}
+\pagestyle{fancy}
+
+V první části maturitní práce by se měla objevit informace o tom, jaký problém řešíte. Co si Váš projekt klade za cíl?
+
+\section{První sekce teoretické části}
+
+\lipsum
+
+
+\chapter{Implementace}
+
+Druhá kapitola obsahuje detailní informace o tom, jak probíhala implementace. Zde se objeví zdůvodnění výběru technologií, řešení problémů, na které jste narazili, informace o použitých knihovnách apod. Pochvalte se, nikdo to za Vás neudělá. Přiznejte chyby, není to ostuda.
+
+\section{Ukázka sekce}
+
+\lipsum
+
+\chapter{Technická dokumentace}
+
+Poslední kapitola obsahuje informace o tom, jak projekt, který v rámci maturitní práce vznikl, nainstalovat, spustit a používat.
+
+\section{Ukázka sekce}
+
+\lipsum[5]
+
+\subsection{A jedné podsekce}
+
+\lipsum
+
+\section{A další sekce}
+
+\lipsum
+
+\chapter*{Závěr}
+\pagestyle{empty}
+\addcontentsline{toc}{chapter}{Závěr}
+
+Závěr obsahuje shrnutí práce a vyjadřuje se k míře splnění jejího zadání. Dále by se zde mělo objevit sebehodnocení studenta a informace o tom, co nového se naučil a jak vnímal svou práci na projektu.
+
+%%% Seznam použité literatury
+\nocite{einstein}\nocite{latexcompanion}\nocite{knuthwebsite}
+\printbibliography[title={Seznam použité literatury},heading={bibintoc}]
+
+%%% Seznam obrázků
+\openright
+\listoffigures
+\addcontentsline{toc}{chapter}{Seznam obrázků}
+
+%%% Seznam tabulek
+\clearpage
+\listoftables
+\addcontentsline{toc}{chapter}{Seznam tabulek}
+
+%%% Přílohy k práci, existují-li. Každá příloha musí být alespoň jednou
+%%% odkazována z vlastního textu práce. Přílohy se číslují.
+
+%\part*{Přílohy}
+%\appendix
+
+\end{document}

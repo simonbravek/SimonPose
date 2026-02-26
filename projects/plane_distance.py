@@ -89,7 +89,7 @@ final_losses = []
 if TORSO_MASK:
     torso_mask = torch.zeros(6890, dtype=torch.bool, device=device) # mask S torso vertices in the SMPL mesh
 
-    with open(os.path.join(DATA_DIR, "body_parts_to_6889_points.json"), "r") as f:
+    with open(os.path.join(DATA_DIR, "body_parts_to_6890_points.json"), "r") as f:
         body_parts_to_points = json.load(f)
 
     for key in ['spine', 'spine1', 'spine2', 'hips', 'leftShoulder', 'rightShoulder']:
@@ -121,7 +121,7 @@ color_map = (embed_map * 255).to(torch.uint8)
 
 cocoGt = COCO(os.path.join(DATA_DIR, "densepose_minival2014_cse.json"))
 
-# GLoBAL VARIABLES
+# GLOBAL VARIABLES
 all_indices = torch.arange(6890, device=device)
 torso_indices = all_indices[torso_mask]
 
