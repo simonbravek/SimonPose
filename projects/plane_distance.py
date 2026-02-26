@@ -28,7 +28,8 @@ from tqdm import trange
 from tqdm import tqdm
 
 # modules
-from utils import (get_translation,
+from config import *
+from common.utils import (get_translation,
                     get_camera_intrinsics,
                     interpolate,
                     get_inside_box,
@@ -56,14 +57,6 @@ FOV = 60
 CONSTANT = 1000000000
 TORSO_MASK = False # if False, the whole mesh is used
 
-PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
-REPO_ROOT = os.path.dirname(os.path.dirname(PROJECT_ROOT))
-DATA_DIR = os.path.join(REPO_ROOT, "data")
-EXTERNAL_DIR = os.path.join(REPO_ROOT, "external")
-IMAGE_ROOT = os.path.join(DATA_DIR, "val2014")
-SMPL_MODEL = os.path.join(REPO_ROOT, "models/smpl/models/basicmodel_neutral_lbs_10_207_0_v1.1.0.pkl")
-DENSEPOSE_CONFIG = os.path.join(EXTERNAL_DIR, "detectron2/projects/DensePose/configs/cse/densepose_rcnn_R_101_FPN_DL_s1x.yaml")
-DENSEPOSE_WEIGHTS = os.path.join(REPO_ROOT, "models/densepose/model_final_1d3314.pkl")
     
 # INITIAL SETUP
 parser = argparse.ArgumentParser(description="My program with output and number arguments")
@@ -73,8 +66,8 @@ parser.add_argument('-i', '--iterations', type=int, required=False, help="Number
 args = parser.parse_args()
 
 for i in range(10):
-    if not os.path.exists(os.path.join(PROJECT_ROOT, f"output/output_{i}")):
-        OUTPUT_DIR = os.path.join(PROJECT_ROOT, f"output/output_{i}")
+    if not os.path.exists(str(OUTPUT_ROOT / f"plane_distance_{i}")):
+        OUTPUT_DIR = OUTPUT_ROOT / f"plane_distance_{i}"
         break
     elif i == 9:
         print("No output directory found, please remove the existing ones or change the output name.")
@@ -82,12 +75,12 @@ for i in range(10):
 
 # change if modified by arguments
 if args.output:
-    OUTPUT_DIR = os.path.join(PROJECT_ROOT, args.output)
+    OUTPUT_DIR = PROJECT_ROOT / args.output
 print(f"Output directory: {OUTPUT_DIR}")
 NUMBER_OF_IMAGES = args.number
 ITERATIONS = args.iterations
 
-os.makedirs(OUTPUT_DIR, exist_ok=True)
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 beginning_losses = []
@@ -114,8 +107,8 @@ config = get_cfg()
 add_densepose_config(config)
 
 # the architecture of densepose model
-config.merge_from_file(DENSEPOSE_CONFIG)
-config.MODEL.WEIGHTS = DENSEPOSE_WEIGHTS
+config.merge_from_file(str(DENSEPOSE_CONFIG))
+config.MODEL.WEIGHTS = str(DENSEPOSE_WEIGHTS)
 config.MODEL.DEVICE = device
 predictor = DefaultPredictor(config) 
 model = predictor.model.eval()
@@ -150,7 +143,7 @@ plot_scale = 1.3
 image_ids = cocoGt.getImgIds()[OFFSET : NUMBER_OF_IMAGES + OFFSET]
 for image_id in tqdm(image_ids, position=0, desc="Images", disable=not ISATTY):
     image_info = cocoGt.loadImgs(image_id)[0]
-    original_image = cv2.imread(os.path.join(IMAGE_ROOT, image_info['file_name']))
+    original_image = cv2.imread(os.path.join(COCO_DIR, image_info['file_name']))
 
     plot_h, plot_w = original_image.shape[:2]
 
@@ -360,7 +353,7 @@ for image_id in tqdm(image_ids, position=0, desc="Images", disable=not ISATTY):
         plt.grid(False) 
         plt.axis('on')
 
-        plt.savefig(os.path.join(OUTPUT_DIR, f"{image_id}_{person_index}_overview.png"))
+        plt.savefig(OUTPUT_DIR / f"{image_id}_{person_index}_overview.png")
         plt.close()
 
         # TODO filter out poor detections
@@ -374,7 +367,7 @@ for image_id in tqdm(image_ids, position=0, desc="Images", disable=not ISATTY):
     plt.ylabel('Number of images')
     plt.title('Distribution of final losses across images')
     plt.grid()
-    plt.savefig(os.path.join(OUTPUT_DIR, 'loss_histogram.png'))
+    plt.savefig(OUTPUT_DIR / 'loss_histogram.png')
     plt.close()
 
     plt.figure(tight_layout=True)
@@ -383,7 +376,7 @@ for image_id in tqdm(image_ids, position=0, desc="Images", disable=not ISATTY):
     plt.ylabel('Number of images')
     plt.title('Distribution of loss improvement across images')
     plt.grid()
-    plt.savefig(os.path.join(OUTPUT_DIR, 'loss_improvement_histogram.png'))
+    plt.savefig(OUTPUT_DIR / 'loss_improvement_histogram.png')
     plt.close()
 
 

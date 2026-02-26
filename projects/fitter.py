@@ -19,8 +19,10 @@ from densepose.engine import Trainer
 from densepose.modeling.cse.utils import get_closest_vertices_mask_from_ES
 from densepose.structures.mesh import create_mesh
 from densepose.vis.densepose_outputs_vertex import get_xyz_vertex_embedding
-from densepose_overrides import CustomBoxesPredictor
 
+# modules
+from common.densepose_overrides import CustomBoxesPredictor
+from config import *
 
 
 # GLOBALS
@@ -30,14 +32,6 @@ NUMBER_OF_IMAGES = 1
 LOSS_AREA = 300 * 300
 FOV = 60
 
-PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
-REPO_ROOT = os.path.dirname(PROJECT_ROOT)
-DATA_DIR = os.path.join(REPO_ROOT, "data")
-EXTERNAL_DIR = os.path.join(REPO_ROOT, "external")
-IMAGE_ROOT = os.path.join(DATA_DIR, "val2014")
-SMPL_MODEL = os.path.join(REPO_ROOT, "models/smpl/models/basicmodel_neutral_lbs_10_207_0_v1.1.0.pkl")
-DENSEPOSE_CONFIG = os.path.join(EXTERNAL_DIR, "detectron2/projects/DensePose/configs/cse/densepose_rcnn_R_101_FPN_DL_s1x.yaml")
-DENSEPOSE_WEIGHTS = os.path.join(REPO_ROOT, "models/densepose/model_final_1d3314.pkl")
 
 # INITIAL SETUP
 parser = argparse.ArgumentParser(description="My program with output and number arguments")
@@ -46,8 +40,8 @@ parser.add_argument('-n', '--number', type=int, required=False, help="Number of 
 args = parser.parse_args()
 
 for i in range(10):
-    if not os.path.exists(os.path.join(PROJECT_ROOT, f"output/output_{i}")):
-        OUTPUT_DIR = os.path.join(PROJECT_ROOT, f"output/output_{i}")
+    if not os.path.exists(str(OUTPUT_ROOT / f"plane_distance_{i}")):
+        OUTPUT_DIR = OUTPUT_ROOT / f"plane_distance_{i}"
         break
     elif i == 9:
         print("No output directory found, please remove the existing ones or change the output name.")
@@ -55,11 +49,11 @@ for i in range(10):
 
 # change if modified by arguments
 if args.output:
-    OUTPUT_DIR = os.path.join(PROJECT_ROOT, args.output)
+    OUTPUT_DIR = PROJECT_ROOT / args.output
 print(f"Output directory: {OUTPUT_DIR}")
 NUMBER_OF_IMAGES = args.number
 
-os.makedirs(OUTPUT_DIR, exist_ok=True)
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 torch.set_grad_enabled(False)
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -106,7 +100,7 @@ for image_id in tqdm(sorted(cocoGt.getImgIds())[:NUMBER_OF_IMAGES]):
         continue
 
     image = cv2.imread(
-        os.path.join(IMAGE_ROOT, im_data['file_name'])
+        os.path.join(COCO_DIR, im_data['file_name'])
     )
     H, W = image.shape[:2]
 
@@ -192,7 +186,7 @@ for image_id in tqdm(sorted(cocoGt.getImgIds())[:NUMBER_OF_IMAGES]):
         ax.view_init(azim=-90, elev=90)
         plt.colorbar(sm, cax=fig.add_subplot(gs[3]))
 
-        plt.savefig(os.path.join(OUTPUT_DIR, f"test_{ann['id']}"))
+        plt.savefig(OUTPUT_DIR / f"test_{ann['id']}")
 
         # breakpoint()
 

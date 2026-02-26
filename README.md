@@ -1,6 +1,14 @@
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 # SimonPOSE
+## How to run
+
+After you are all set up, you can should run the projects from the repo root so that you could use the ```config.py``` with all the paths. You can alter this file if you for any reason decide not to stick with our file structure. The projects are treated as separate python packages and so you should run them from the project root with the command
+
+```
+python3 projects.[project name]
+```
+
 ## Setup
 ### On CTU cluster
 If you have access to the CTU university servers, there is a setup guide for the repo. 
@@ -11,14 +19,15 @@ nvidia-smi
 ```
 and set you environment variable so that you see only the free device you want to use for the best performance. You can do that by prepanding this when you run the script: 
 ```
-CUDA_VISIBLE_DEVICES=8 python3 projects/plane_distance/main.py      # Or whatever number is free
+CUDA_VISIBLE_DEVICES=8 python3 projects.plane_distance      # Or whatever number is free
 ```
 #### Environment
 The heavy modules are already on the system and should simply be loaded through
 
 ```
-ml PyTorch/2.4.0-foss-2023b-CUDA-12.4.0 torchvision/0.19.0-foss-2023b-CUDA-12.4.0 OpenCV/4.10.0-foss-2023b-CUDA-12.4.0-contrib Albumentations/1.4.4-foss-2023b-CUDA-12.4.0 pycocotools/2.0.7-foss-2023b matplotlib/3.8.2-gfbf-2023b
+ml PyTorch/2.4.0-foss-2023b-CUDA-12.4.0 torchvision/0.19.0-foss-2023b-CUDA-12.4.0 OpenCV/4.10.0-foss-2023b-CUDA-12.4.0-contrib Albumentations/1.4.4-foss-2023b-CUDA-12.4.0 pycocotools/2.0,7-foss-2023b matplotlib/3.8.2-gfbf-2023b
 ```
+
 and create an environment with the following packages. I have simply done it using the native python environment manager inside of the project's directory. You can also use ```conda``` for the management. 
 ```
 python3.11 -m venv .venv
@@ -122,12 +131,6 @@ curl -L -o densepose_minival2014_cse_online.json "https://dl.fbaipublicfiles.com
 ```
 You should save this into ```data``` directory. 
 
-```
-NOTE:
-
-For purposes where the fractional body parts approach is desired we can use the original verison that did not use: https://github.com/facebookresearch/DensePose/tree/main/DensePoseData. Please note that this is the first version of _detectron_ and so it should not be used for anything but the dataset as all the projects in there are outdated and not supported. The annotations for this verison can be downloaded on https://dl.fbaipublicfiles.com/densepose/densepose_coco_2014_minival.json.
-```
-
 ### DensePose model weights
 The model weights are on https://github.com/facebookresearch/detectron2/blob/main/projects/DensePose/doc/DENSEPOSE_CSE.md. We opted for _R_101_FPN_DL_soft_s1x_ as that is the biggest model with the best performance. You can install the model weights at we use by: 
 ```
@@ -153,7 +156,9 @@ curl -L -o SMPL_python_v.1.1.0.zip "https://download.is.tue.mpg.de/download.php?
 The folder called ```smplx``` from inside the downloaded folder belongs to the ```models``` in our project. 
 
 
+
 ## Credits and licenses
 This project utilizes the following open-source libraries:
 * [Detectron2](https://github.com/facebookresearch/detectron2) (Apache 2.0)
 * [DensePose](https://github.com/facebookresearch/densepose) (Apache 2.0)
+* [COCO](https://github.com/cocodataset/cocoapi) (Apache 2.0)

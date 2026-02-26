@@ -8,12 +8,11 @@ __pycache__/
 # Leave out
 data/*
 output/
-models/*
-external/*
+models/
+external/
 .venv/
 .vscode/
 
 # Put back
 !/data/body_parts_to_6889_points.json
-!/external/*.py
 !.gitkeep
