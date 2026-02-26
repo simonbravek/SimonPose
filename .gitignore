@@ -1,0 +1,19 @@
+# Cache and system files
+__pycache__/
+.pytest_cache/
+.DS_Store
+.env*
+*.log
+
+# Leave out
+data/*
+output/
+models/*
+external/*
+.venv/
+.vscode/
+
+# Put back
+!/data/body_parts_to_6889_points.json
+!/external/*.py
+!.gitkeep
