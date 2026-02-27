@@ -1,8 +1,8 @@
-PWD /Users/simonbravek/Projects/simonpose/documentation
+PWD /Users/simonbravek/Projects/simonpose/dokumentace
 INPUT /usr/local/texlive/2025/texmf.cnf
 INPUT /usr/local/texlive/2025/texmf-dist/web2c/texmf.cnf
 INPUT /usr/local/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt
-INPUT /Users/simonbravek/Projects/simonpose/documentation/main.tex
+INPUT /Users/simonbravek/Projects/simonpose/dokumentace/main.tex
 OUTPUT main.log
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/base/report.cls
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/base/report.cls
@@ -493,6 +493,11 @@ INPUT /usr/local/texlive/2025/texmf-dist/fonts/vf/adobe/palatino/pplb9d.vf
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/adobe/palatino/pplb8r.tfm
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/mathpazo/fplmb.tfm
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/adobe/palatino/pplbj8r.tfm
+INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/psnfss/ts1pplj.fd
+INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/psnfss/ts1pplj.fd
+INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/psnfss/ts1pplj.fd
+INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/adobe/palatino/pplr9c.tfm
+INPUT /usr/local/texlive/2025/texmf-dist/fonts/vf/adobe/palatino/pplr9c.vf
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/adobe/palatino/pplri9d.tfm
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/adobe/palatino/pplrc9d.tfm
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/sourcecodepro/T1SourceCodePro-TLF.fd
@@ -520,7 +525,6 @@ INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/eulervm/zeusb10.tfm
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/eulervm/zeusb7.tfm
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/mathpazo/zplmb7t.tfm
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/mathpazo/zplmb7t.tfm
-INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/adobe/palatino/pplri9d.tfm
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/vf/adobe/palatino/pplri9d.vf
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/adobe/palatino/pplri8r.tfm
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/mathpazo/fplmri.tfm
@@ -530,10 +534,6 @@ INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/adobe/palatino/pplr8r.tfm
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/vf/adobe/sourcecodepro/SourceCodePro-Regular-tlf-t1.vf
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/adobe/sourcecodepro/SourceCodePro-Regular-tlf-t1--base.tfm
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/sourcecodepro/a_lutrty.enc
-INPUT /usr/local/texlive/2025/texmf-dist/fonts/vf/adobe/palatino/pplri9d.vf
-INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/adobe/palatino/pplri8r.tfm
-INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/mathpazo/fplmri.tfm
-INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/adobe/palatino/pplrij8r.tfm
 INPUT ./main.lof
 INPUT ./main.lof
 INPUT main.lof

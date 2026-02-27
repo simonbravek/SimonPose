@@ -51,14 +51,59 @@ Děkuji Jiřímu Matasovi za skvělou příležitost strávit měsíc v létě n
 \setcounter{tocdepth}{2}
 \tableofcontents
 
+\chapter*{Úvod}
+\addcontentsline{toc}{chapter}{Úvod}
+
+\section{Analýza postavy v digitálním světě}
+
+V současné informatice a počítačovém vidění (Computer Vision) představuje automatické porozumění lidského pohybu jednu z největších výzev. Nejde již o prostou detekci zda se v obrázku nachází člověk, či kolik jich je, ale o snahu přenést lidskou biomechaniku do digitálního prostoru. Schopnost přesně interpretovat lidskou pózu z běžného 2D obrazu (např. z mobilního telefonu) otevírá dveře aplikacím, které byly dříve nemyslitelné bez drahých studiových systémů pro snímání pohybu (Motion Capture).
+
+Tyto technologie se dnes nachází již v mnoha podobách a můžou tak pomoci v celé řadě aplikací. Dnes již můžeme najít rozpoznání člověka a obličeje v mobilní aplikaci galerie, kde napomáhá chytrému třízení fotek nebo v bezpečnostních systémech pro detekci vetřelce. Detekce konkrétní pozice, tedy kde se nachází jednotlivé klouby, může zase pomoci zastavit automatický vozík před kolizí s člověkem nebo zavolat pomoc pokud uvidí nehybně ležícího chodce. 
+
+Kromě přesnosti těchto metod se vědci čím dál více zaměřují také na rychlost. Mnohé aplikace totiž potřebují živou analýzu videa a to často i z několika kamer najednou. Tak tomu je u autonomního řízení automobilů, které se ukazuje být velkým tahounem tohoto odvětví.
+
+\section{Motivace}
+
+
+
+
 \chapter{Teoretická část}
 \pagestyle{fancy}
 
-V mojí práci se zaměřuji na vylepšení odhadu lidské pozice na základě jednoho vstupního obrázku. Jedná se o disciplínu počítačového vidění, která se vyvinula relativně nedávno - nejvíc při zve
+\section{Základní teorie} 
 
-\section{První sekce teoretické části}
+\subsection{Co je to model?}
 
-\lipsum
+V této práci se často budu věnovat programům, které využívají metodu strojového učení k detekci a odhadu pozice člověka v obrázku, který nazýváme model. Tento program má mnoho parametrů na základě nichž přetváří vstup na výstup. Nejdříve projde procesem, které nazýváme trénování. Během toho se jako vstup použije obrázek a program k němu vygeneruje souřadnice, kde odhaduje klouby, na základě prvního nastavení parametrů, neboli inicializace. Inicializace bývá velmi složitá a často je předmětem celých studií \cite{mishkin2016goodinit} a nebudeme se jí věnovat v této práci. .Tento výsledek se pak porovná s ukázkovým příkladem pro tento obrázek, tedy pro anotaci, která byla předtím připravena člověkem. 
+
+Dále zvolíme metodu pro výpočet chyby výstupu (loss). Proces generování výstupu opakujeme mnohokrát pro velké množství obrázků a anotací toho. Skupině těchto dat říkáme trénovací dataset. Je nutné mít velké množtví obrázků a anotací ještě před začátkem trénování. Ty pochází v drtivé většině případů od lidských anotátorů a jsou tak velmi drahé. Navíc jsou předmětem lidské chybovosti. Součtem, nebo jinou metodou tak spočítáme ztrátovou funkci (loss funcion) jako metriku chybovosti odhadu našeho modelu od anotací
+
+\subsection{Odhad 2D a jeho limitace}
+
+Tradiční metody odhadu pózy se po léta soustředily na tzv. sparse keypoints -- detekci klíčových bodů, jako jsou lokty, kolena či ramena -- které detekují jako dvojici souřadnic v daném obrázku. Přestože jsou tyto modely (např. OpenPose) rychlé a efektivní, trpí zásadním nedostatkem: ztrátou prostorové informace a tělesného objemu. Zatímco mají perfektní výsledky v laboratorních podmínkách, selhávají v reálných situacích (in-the-wild), kde jim 2D obrázek neposkytuje dost jasné informace pro detekci pozice. Mezi faktory ovlivňující přesnost výstupu patří:
+
+\begin{itemize}
+    \item \textbf{Zákryty (Occlusions):} Části těla zakryté předměty nebo jinými částmi těla.
+    \item \textbf{Perspektivní zkreslení:} Extrémní úhly kamery, které deformují vizuální proporce těla.
+    \item \textbf{Vizuální šum:} Volné oblečení nebo špatné světelné podmínky.
+    \item \textbf{Propletení více těl:} Situace v davu, kde není jasné, komu patří jaká část těla a jak je správně rozdělit. 
+\end{itemize}
+
+\subsection{Od 2D bodů k 3D objemu}
+
+Řešení těchto složitých případu významně napomáhá představa 3D modelu těla a jeho pozice na dané scéně. Vezmeme-li situaci člověka skákajícího na lyžích zespudu, jeho tělesné proporce budou zcela nestandardní (malá hlava, velké nohy, spousta zakrytých částí těla). Pokud si ale představím model lidského těla a promítnu ho do obrázku, pak jsem značně omezen a najít správné orientace končetin se značně zjednoduší. Představa těla ve 2D mi naopak dovoluje zvažovat pozice, jež by byli lidské tělo zcela nepřirozené, či anatomicky nemožné. Modely, které spolu s pozicí kloubů odhadují také 3D orientaci těla se díky tomu stávají lepší v samotném odhadování pozice kloubů.
+
+Samotné rozpoznávání 2D pozice se dostává ke svým limitům také proto, že jejich přesnost se blíží datům na kterých jsou trénovány. 
+\cite{moravkova2025}. 
+Další k rozpoznání 3D pozice těla je zle
+
+\subsection{Cíl práce}
+
+
+
+
+\section{Druhy detekcí}
+K tomuto účelu se využívá hned několik metod. Tou úplně nejzákladnější jsou rámečky k ohraničení detekovaných lidí. skládají se ze dvou souřadnic
 
 
 \chapter{Implementace}
