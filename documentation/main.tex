@@ -30,7 +30,7 @@ Děkuji Jiřímu Matasovi za skvělou příležitost strávit měsíc v létě n
 
 % Abstrakt česky
 \def\Abstrakt{%
-
+Jde o explorativní analýzu s cílem přinést metody pro zlepšení human pose estimation.
 }
 
 % Abstrakt anglicky
@@ -134,21 +134,8 @@ Přechod od 2D chápání člověka k pochopení objemové struktury lidského t
 
 Namodelovat realistické lidcké tělo na základě bodů je velmi náročná disciplína. My bychom takové tělo chtěli modelovat automaticky, v reálném čase a s tělesnými proporcemi a pozicí, jakou si zadáme. Proto vznikl SMPL model, který na základě parametrů $\beta$ a $\theta$ vytvoří síťovinu libovolného člověka. 
 
-Celý model těla vzniká takto: 
-
-
-\begin{itemize}
-    \item \textbf{T-pose:} Souřadnic bodů kanonického těla v klidu (tedy univerzálního zvolenéhe těla, které zobrazuje průměrného člověka ve všech proporcích). 
-    \item \textbf{Joints:} Polohy všech kloubů požadované pozice těla. Každý bod na těle je posunut na tomto základě. Poloha všech kloubů je plně závislá na parametru $\theta$. 
-    \item \textbf{Omega:} Reprezentuje tělesné proporce konkrétního člověka.
-    \item \textbf{Propletení více těl:} Situace v davu, kde není jasné, komu patří jaká část těla a jak je správně rozdělit. 
-\end{itemize}
-
-$M(\beta, \theta) = W(T_p(\beta, \theta), J(\beta), \theta, \mathcal{W})$
-Generativní proces modelu SMPL (od šablony přes tvarové a pózové deformace až po skinning) je schematicky znázorněn na obr.~\ref{fig:smpl-stage-1}--\ref{fig:smpl-stage-3}.
-
-
-Začne se se souřadnicemi bodů kanonického těla $\bar{T}$ v klidu (tedy univerzálního zvolenéhe těla, které zobrazuje průměrného člověka ve všech proporcích). Ke každému bodu se následně přičte posunutí na základě parametru tělesných proporcí $\beta$ příspěvkem $B_s(\beta)$. Tak vznikne T-pose správných tělesných proporcí. Také vypočteme počáteční pozici kloubů $J(\beta)$ na základě tělesných proporcí. 
+\subsection{Výpočet}
+Celý model těla vzniká tak, že se začne se souřadnicemi bodů kanonického těla $\bar{T}$ v klidu (tedy univerzálního zvolenéhe těla, které zobrazuje průměrného člověka ve všech proporcích). Ke každému bodu se následně přičte posunutí na základě parametru tělesných proporcí $\beta$ příspěvkem $B_s(\beta)$. Tak vznikne T-pose správných tělesných proporcí. Také vypočteme počáteční pozici kloubů $J(\beta)$ na základě tělesných proporcí. 
 
 \begin{figure}[H]
     \centering
@@ -171,9 +158,11 @@ Nakonec se vše poskládá dohromady pomocí funkce $W(\cdot)$ ještě s konečn
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{img/stage_3.png}
-    \caption{SMPL -- stage 3: aplikace linear blend skinningu $W(\cdot)$ a výsledná póza těla v prostoru.}
+    \caption{SMPL -- stage 3}
     \label{fig:smpl-stage-3}
 \end{figure}
+
+\subsection{Výhody}
 
 Tento model má výhodu v tom, že parametry $\theta$ a $\beta$ usměrní výslednek tak, aby bylo velmi těžké zdeformovat obrázek do nelidských proporcí. Zároveň však dokáže popsat celou řadu lidských těl. Je díky tomu vhodná pro
 
@@ -182,29 +171,139 @@ Tato knihovna je pro komerční účely zpoplatněná, ale pro vědecké účely
 
 \section{DensePose}
 
+DensePose je metoda z oblasti počítačového vidění, která z obyčejného 2D obrázku odhaduje \textbf{hustou korespondenci} mezi pixely a povrchem lidského těla. Na rozdíl od klasického odhadu pózy pomocí klíčových bodů (např. lokty a kolena) se zde nepracuje s několika desítkami bodů, ale s tisíci pixelů, které lze přiřadit ke konkrétním místům na těle. Prakticky to znamená, že pro každý pixel patřící člověku dokáže DensePose určit, \emph{kam na 3D povrch těla by tento pixel patřil}, pokud bychom měli k dispozici standardizovanou šablonu těla.
+
+Jádrem celé myšlenky je kanonická reprezentace těla (tedy povrch „průměrného“ člověka v jednotných souřadnicích) a síť, která se učí předpovídat mapování z obrazu do této kanonické reprezentace. DensePose je typicky používán jako nadstavba detekce osob: nejprve se nalezne ohraničující rámeček (bounding box) postavy a teprve v jeho rámci se provede husté mapování pixelů na povrch těla. Díky tomu se výpočet soustředí na relevantní část obrazu a je možné pracovat s výstupem po jednotlivých lidech.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{img/DenseAnnoFigure.png}
+    \caption{DensePose -- DenseAnnoFigue, Zobrazuje korespondenci 2D pixelu s vybraným bodem na kanonické 3D síti lidského těla.}
+    \label{fig:densepose-DenseAnnoFigue}
+\end{figure}
+
+\subsection{DensePose v1: mapování pomocí (I, U, V)}
+
+Původní verze DensePose (v této práci ji budu označovat jako DensePose v1) používá parametrizaci povrchu těla pomocí několika tělesných „chartů“ (segmentů). Výstupem je pro každý pixel na postavě trojice (I, U, V):
+
+\begin{itemize}
+    \item \textbf{I:} index tělesného segmentu (např. levou paži, trup apod.),
+    \item \textbf{U, V:} souřadnice v rámci 2D parametrizace daného segmentu.
+\end{itemize}
+
+Tento výstup je vhodný například pro přenos textur nebo pro vizualizaci mapování povrchu, ale pro následný fitting parametrického modelu (např. SMPL) je potřeba navíc řešit převod z (I, U, V) do konkrétních bodů nebo vrcholů (vertices) na síťovině. To je možné, ale v praxi to přidává další vrstvu komplikací, protože optimalizační algoritmus pak nepracuje přímo s jednoznačnou korespondencí na SMPL mřížce.
+
+\subsection{DensePose v2: Continuous Surface Embeddings (CSE)}
+
+Novější varianta, kterou v této práci používám (DensePose v2), přechází od explicitních (I, U, V) souřadnic k tzv. Continuous Surface Embeddings (CSE). Místo toho, aby síť přímo vracela parametrické souřadnice na těle, vrací pro každý pixel vektor embeddingu (tedy bod v naučeném vektorovém prostoru), který reprezentuje odpovídající místo na povrchu těla. Současně vrací i hrubou segmentaci (coarse segmentation), která říká, které pixely v daném rámečku vůbec patří postavě.
+
+Z praktického hlediska tak DensePose v2 produkuje dvě hlavní struktury:
+
+\begin{itemize}
+    \item \textbf{Masku $S$} o rozměrech $H \times W$ (binární nebo vícetřídní), která určuje pixely patřící tělu.
+    \item \textbf{Matici vektorů $E$} o rozměrech $H \times W \times D$, kde $D$ je dimenze embeddingu, a každý pixel tak nese svůj vektor $\mathbf{e} \in \mathbb{R}^D$.
+\end{itemize}
+
+Tyto mapy jsou definované v souřadnicích rámečku detekované osoby a lze je přepočítat na libovolné rozlišení (typicky interpolací na nové $H$ a $W$). V praxi je to důležité, protože výstup se dá škálovat podle toho, zda preferuji rychlost (nižší rozlišení) nebo přesnost a počet korespondenčních bodů (vyšší rozlišení). Pro účely optimalizace je pak možné z embeddingů odvodit i jednoznačný index vrcholu na SMPL síťovině: pro každý pixel se vybere ten vrchol, jehož předpočítaný embedding je vektorově nejbližší (typicky podle kosinové podobnosti). Výsledkem je tedy mřížka indexů, která mapuje pixely přímo na vrcholy SMPL (např. 6890 vrcholů), a tu lze přímo použít v loss funkci.
+
+DensePose v2 jsem zvolil z několika důvodů. Především mě překvapila jeho přesnost i v podmínkách mimo laboratorní datasety a zároveň jde o open-source řešení postavené nad ekosystémem Detectron2, které je dobře integrovatelné do vlastního pipeline. Zároveň je férové říct, že DensePose jako projekt dnes působí spíše jako \emph{vědci trochu zapomenutá} technologie: nové práce často preferují holistické modely, které rovnou odhadují parametry těla nebo celé 3D reprezentace. DensePose však zůstává velmi vhodný pro navazující práci právě kvůli tomu, jaký typ výstupu poskytuje. Moderní holistické modely mívají výstup „hotový“ (např. klouby nebo SMPL parametry), ale neposkytují jednoduchý způsob, jak si vyžádat hustou, škálovatelnou korespondenci pixelů na povrch těla, kterou lze přímo zapojit do vlastní optimalizace.
+
+\subsection{Silné a slabé stránky}
+
+Největší výhodou DensePose je, že poskytuje hustý signál: i když část těla není jasně vidět, zbytek povrchu často dává dostatek informací pro smysluplné omezení 3D řešení. Tento typ výstupu je navíc přirozeně kompatibilní s fittingem SMPL, protože umožňuje formulovat ztrátovou funkci nad velkým množstvím korespondenčních bodů.
+
+Zároveň má DensePose několik slabin, které se v praxi projeví velmi rychle. Výstup bývá často šumový a místo hladkého povrchu připomíná „lupínky“ (lokálně nekonzistentní přiřazení sousedních pixelů). To vede k tomu, že i při vizuálně správné detekci může být lokální korespondence nekvalitní. Dalším typickým problémem je záměna symetrických částí těla: model může například označit obě nohy jako levé, případně prohodit levou a pravou stranu. V neposlední řadě se chyby objevují i na hranách segmentace (např. u volného oblečení), kde maska zahrne pixely, které ve skutečnosti neodpovídají povrchu těla.
+
+Právě tyto slabiny jsou hlavním důvodem, proč jsem se rozhodl na DensePose navázat. Místo toho, abych DensePose bral jako „konečný“ výsledek, beru jej jako velmi bohatý, ale nedokonalý signál, který je potřeba dále zpracovat a zpřesnit tak, aby byl fitting SMPL stabilní a robustní i v hraničních případech.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{img/densepose-output.png}
+    \caption{DensePose -- Output, Použili jsme barevnou mapu (colormap) Jet pro ilustraci. Ukazuje neplynulou segmentaci. Také artefakt na pravé noze člověka. Obrázek pochází z datasetu COCO.}
+    \label{fig:densepose-output}
+\end{figure}
+
+\chapter{Explorativní část}
+
+V rámci své explorativní analýzi jsem navrhl 3 možná metodická zlepšení. Všechna z nich využívají metodu napasování (fitting) SMPL postavy. 
+
+\section{Vzdálenost bodu na těle}
+
+\subsection{Návrh metody}
+
+Tato metoda vychází z myšlenky, že DensePose v2 neposkytuje jen masku postavy, ale především „otisk“ povrchu těla v podobě embeddingu. Každému pixelu, který patří postavě, odpovídá vektor $\mathbf{e} \in \mathbb{R}^D$, jenž reprezentuje konkrétní místo na kanonickém povrchu těla. Pokud tedy dokážu pro aktuální odhad SMPL určit, „jaké místo na povrchu“ je vidět v každém pixelu, mohu DensePose použít jako husté omezení (constraint) pro fitting a netrénovat žádnou novou síť.
+
+Klíčovým krokem je získání korespondence mezi pixely v obraze a body na SMPL síťovině. Místo prosté projekce vrcholů do 2D (která ignoruje zákryty a často vede k falešným přiřazením) jsem uvažoval o vyrenderování SMPL pomocí ray tracingu (prakticky ekvivalent Z-bufferu, jen formulovaný jako průnik paprsku s trojúhelníky). Pro každý pixel v rámci bounding boxu tak získám trojici vrcholů trojúhelníku, který je v daném směru nejblíže kameře, a barycentrické váhy průniku. Díky tomu lze pro daný pixel vypočítat „spojitý“ embedding bodu na SMPL povrchu jako interpolaci embeddingů vrcholů.
+
+Formálně označme $S$ množinu pixelů, které DensePose považuje za tělo (coarse segmentation). DensePose zároveň dává embedding $\mathbf{e}_p$ pro každý $p \in S$. Pro SMPL si předpočítám embedding pro každý vrchol (stejně jako v pipeline DensePose CSE) a při ray tracingu získám pro pixel $p$ trojúhelník $(i,j,k)$ a váhy $(\alpha,\beta,\gamma)$. Interpolovaný embedding na povrchu SMPL je pak
+\[
+\tilde{\mathbf{e}}_p = \alpha\,\mathbf{v}_i + \beta\,\mathbf{v}_j + \gamma\,\mathbf{v}_k,
+\]
+kde $\mathbf{v}_i$ jsou embeddingy vrcholů SMPL. Protože embeddingy DensePose se běžně L2-normalizují, dává smysl měřit shodu pomocí kosinové podobnosti, tedy skalárního součinu normalizovaných vektorů (ne vektorového součinu, který je navíc definován jen v $\mathbb{R}^3$). Ztrátovou funkci pak lze napsat například jako
+\[
+\mathcal{L}_{\text{CSE}} = \sum_{p \in S} \bigl(1 - \langle \hat{\mathbf{e}}_p,\, \widehat{\tilde{\mathbf{e}}}_p \rangle\bigr),
+\]
+kde $\hat{\cdot}$ značí normalizaci na jednotkovou délku. Optimalizují se standardní parametry SMPL (globální rotace a posun, parametry pózy $\theta$ a proporcí $\beta$) tak, aby vyrenderovaný povrch měl v každém pixelu co nejpodobnější „bod na těle“ jako DensePose.
+
+Očekávaný přínos této metody je dvojí. Za prvé, SMPL funguje jako humanoidní omezení: i když DensePose lokálně šumí nebo vytváří nespojitosti, fitting je nucen najít globálně konzistentní lidskou geometrii a proporce. Za druhé, tímto přístupem lze z jednoho 2D snímku získat nejen lepší odhad kloubů (přes SMPL skeleton), ale i explicitní 3D rekonstrukci těla. V ideálním případě by se tím zároveň potlačila typická selhání DensePose, jako je záměna levé a pravé strany (např. „obě nohy jako levé“), protože takové řešení je pro jedinou SMPL instanci geometricky obtížně realizovatelné.
+
+Nevýhodou je výpočetní a implementační složitost. Aby bylo možné tuto loss funkci skutečně použít v gradientní optimalizaci, je potřeba mít alespoň přibližně diferencovatelný render (diferencovatelný ray tracing / rasterizaci), případně zvolit alternativu, která se vyhne explicitnímu průseku paprsků. Metodu proto beru primárně jako konceptuálně čistý cíl: přímo porovnat „kde na těle“ DensePose říká, že pixel leží, s tím, „kde na těle“ leží daný pixel podle aktuálního SMPL odhadu.
+
+\subsection{Implementace}
+
+\subsection{Výsledky}
+
+\section{Euklidovká vzdálenost}
+
+\subsection{Návrh metody}
+
+\subsection{Implementace}
+
+\subsection{Výsledky}
 
 
-\section{Navržené metody}
-
-\subsection{Vzdálenost bodu od těla}
 
 
 
-\subsection{Euklidovká vzdálenost}
+
+
+Tato metoda vychází z toho, že DensePose v2 (CSE) mi pro každý pixel postavy nevrátí jen informaci „tady je člověk“, ale také odhad „kde na těle tento pixel leží“. Konkrétně: DensePose pracuje v rámci ohraničujícího rámečku (bounding boxu) detekované osoby a vytvoří (1) masku postavy a (2) embedding. Masku budu značit jako $S$: je to množina pixelů, které DensePose označí jako tělo. Pro každý pixel $p \in S$ DensePose predikuje vektor $\mathbf{e}_p \in \mathbb{R}^D$ (embedding), kde $D$ je pevně daná dimenze (typicky desítky čísel). Intuice je, že podobné vektory odpovídají podobným místům na povrchu těla.
+Abych tento signál mohl použít pro fitting SMPL, potřebuji umět pro aktuální odhad SMPL určit, jaký „bod na těle“ se v každém pixelu skutečně nachází. To není totéž jako vzít nejbližší promítnutý vrchol, protože projekce do 2D ignoruje zákryty: zadní část těla může být promítnuta do stejné oblasti obrazu jako přední část, ale ve skutečnosti ji kamera nevidí. Proto jsem uvažoval o renderování SMPL z pohledu kamery, ideálně tak, aby pro každý pixel bylo jasné, který trojúhelník sítě je opravdu viditelný (tj. nejblíže kameře). Tohle lze udělat standardně pomocí Z-bufferu, nebo si to lze představit jako ray tracing: pro každý pixel vyšlu paprsek do scény a najdu první průsečík se síťovinou.
+Výsledkem renderování pro pixel $p$ je trojúhelník na SMPL síťovině, do kterého paprsek narazil. Trojúhelník popíšu třemi indexy vrcholů $(i, j, k)$. Zároveň dostanu tzv. barycentrické váhy $(\alpha, \beta, \gamma)$, které říkají, jak přesně leží bod průsečíku uvnitř trojúhelníku (platí $\alpha + \beta + \gamma = 1$). Díky tomu umím z vrcholových hodnot dopočítat hodnotu přímo v bodě průsečíku jako „vážený průměr“ vrcholů.
+DensePose CSE má důležitou vlastnost: pro SMPL vrcholy existuje také předpočítaná tabulka embeddingů. Označím ji jako $\mathbf{v}_i \in \mathbb{R}^D$, kde $i$ je index vrcholu SMPL. Pro pixel $p$ pak spočtu embedding bodu na povrchu SMPL, který je v daném pixelu vidět, jako
+\[
+\tilde{\mathbf{e}}_p = \alpha\,\mathbf{v}_i + \beta\,\mathbf{v}j + \gamma\,\mathbf{v}k.
+\]
+Tím mám dvě porovnatelné věci: DensePose embedding $\mathbf{e}_p$ (z obrázku) a „SMPL embedding“ $\tilde{\mathbf{e}}_p$ (z vyrenderované síťoviny).
+Ztrátovou funkci (loss) pak chci definovat tak, aby byla malá, když oba embeddingy odpovídají stejnému místu na těle. V praxi se embeddingy často normalizují na jednotkovou délku (L2-normalizace), a potom se podobnost měří kosinovou podobností, což je skalární součin:
+\[
+\langle \hat{\mathbf{a}}, \hat{\mathbf{b}} \rangle,
+\]
+kde $\hat{\mathbf{a}}$ je vektor $\mathbf{a}$ po normalizaci (má délku 1). Skvělé na tom je, že hodnota je blízko 1, když vektory míří „stejným směrem“ (tedy jsou si podobné), a menší, když si podobné nejsou. Ztrátu tedy mohu napsat například jako
+\[
+\mathcal{L}{\text{CSE}} = \sum{p \in S} \bigl(1 - \langle \hat{\mathbf{e}}_p, \widehat{\tilde{\mathbf{e}}}_p \rangle \bigr).
+\]
+Význam symbolů:
+- $S$ je množina pixelů, které DensePose označilo jako tělo.
+- $p$ je jeden konkrétní pixel z této množiny.
+- $\mathbf{e}_p$ je embedding z DensePose pro pixel $p$.
+- $\tilde{\mathbf{e}}_p$ je embedding, který jsem získal z aktuálního SMPL odhadu renderováním a interpolací.
+- $\langle \cdot, \cdot \rangle$ je skalární součin (po normalizaci odpovídá kosinové podobnosti).
+- výraz $(1 - \text{podobnost})$ je malý, když se embeddingy shodují.
+Optimalizace pak probíhá stejně jako u běžného fittingu SMPL: měním parametry SMPL tak, aby se minimalizovala ztráta. Prakticky jde o globální rotaci a posun těla vůči kameře, parametry pózy $\theta$ (ohyby kloubů) a parametry tvaru $\beta$ (tělesné proporce). Cíl je, aby při renderování SMPL vycházelo pro každý pixel „stejné místo na těle“, jaké predikuje DensePose.
+Hlavní očekávaný přínos je v tom, že SMPL funguje jako humanoidní omezení: DensePose může lokálně „šumět“ (nespojitosti, přeskakování mezi částmi těla, záměna levé a pravé strany), ale SMPL vždy musí zůstat jedna konzistentní lidská síťovina s realistickými proporcemi. Fitting tak může DensePose využít jako hustý signál, ale zároveň chyby „vyhladit“ tím, že nejlepší řešení musí být globálně lidské. Vedlejším přínosem je, že výsledkem není jen sada 2D bodů, ale rovnou 3D model těla, ze kterého lze odvodit klouby i prostorovou pózu.
+Nevýhodou je náročnost implementace: pokud chci dělat gradientní optimalizaci, potřebuji, aby renderování (a tím i výběr viditelného trojúhelníku a barycentrické váhy) bylo alespoň přibližně diferencovatelné, jinak je optimalizace nestabilní nebo nefunguje. Metodu proto beru jako „ideální“ formulaci problému: porovnat přímo „bod na těle“ z DensePose s „bodem na těle“ z aktuálního SMPL odhadu v každém pixelu.
 
 
 
-\subsection{Zaměření na přesnost}
+\section{Zaměření na přesnost}
 
+\subsection{Návrh metody}
 
+\subsection{Implementace}
 
-\chapter{Implementace}
+\subsection{Výsledky}
 
-Druhá kapitola obsahuje detailní informace o tom, jak probíhala implementace. Zde se objeví zdůvodnění výběru technologií, řešení problémů, na které jste narazili, informace o použitých knihovnách apod. Pochvalte se, nikdo to za Vás neudělá. Přiznejte chyby, není to ostuda.
-
-\section{Ukázka sekce}
-
-\lipsum
 
 \chapter{Technická dokumentace}
 

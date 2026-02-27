@@ -10,18 +10,30 @@
 \contentsline {subsection}{\numberline {1.1.3}Odhad 2D a jeho limitace}{5}{subsection.1.1.3}%
 \contentsline {subsection}{\numberline {1.1.4}Od 2D bodů k 3D objemu}{6}{subsection.1.1.4}%
 \contentsline {section}{\numberline {1.2}Skinned Multi-Person Linear Model (SMPL)}{6}{section.1.2}%
+\contentsline {subsection}{\numberline {1.2.1}Výpočet}{6}{subsection.1.2.1}%
+\contentsline {subsection}{\numberline {1.2.2}Výhody}{8}{subsection.1.2.2}%
 \contentsline {section}{\numberline {1.3}DensePose}{8}{section.1.3}%
-\contentsline {section}{\numberline {1.4}Navržené metody}{8}{section.1.4}%
-\contentsline {subsection}{\numberline {1.4.1}Vzdálenost bodu od těla}{8}{subsection.1.4.1}%
-\contentsline {subsection}{\numberline {1.4.2}Euklidovká vzdálenost}{8}{subsection.1.4.2}%
-\contentsline {subsection}{\numberline {1.4.3}Zaměření na přesnost}{8}{subsection.1.4.3}%
-\contentsline {chapter}{\numberline {2}Implementace}{9}{chapter.2}%
-\contentsline {section}{\numberline {2.1}Ukázka sekce}{9}{section.2.1}%
-\contentsline {chapter}{\numberline {3}Technická dokumentace}{11}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Ukázka sekce}{11}{section.3.1}%
-\contentsline {subsection}{\numberline {3.1.1}A jedné podsekce}{11}{subsection.3.1.1}%
-\contentsline {section}{\numberline {3.2}A další sekce}{12}{section.3.2}%
-\contentsline {chapter}{Závěr}{15}{chapter*.11}%
-\contentsline {chapter}{Seznam použité literatury}{17}{chapter*.12}%
-\contentsline {chapter}{Seznam obrázků}{19}{chapter*.12}%
-\contentsline {chapter}{Seznam tabulek}{20}{chapter*.12}%
+\contentsline {subsection}{\numberline {1.3.1}DensePose v1: mapování pomocí (I, U, V)}{9}{subsection.1.3.1}%
+\contentsline {subsection}{\numberline {1.3.2}DensePose v2: Continuous Surface Embeddings (CSE)}{9}{subsection.1.3.2}%
+\contentsline {subsection}{\numberline {1.3.3}Silné a slabé stránky}{10}{subsection.1.3.3}%
+\contentsline {chapter}{\numberline {2}Explorativní část}{13}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Vzdálenost bodu na těle}{13}{section.2.1}%
+\contentsline {subsection}{\numberline {2.1.1}Návrh metody}{13}{subsection.2.1.1}%
+\contentsline {subsection}{\numberline {2.1.2}Implementace}{14}{subsection.2.1.2}%
+\contentsline {subsection}{\numberline {2.1.3}Výsledky}{14}{subsection.2.1.3}%
+\contentsline {section}{\numberline {2.2}Euklidovká vzdálenost}{14}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Návrh metody}{14}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.2}Implementace}{14}{subsection.2.2.2}%
+\contentsline {subsection}{\numberline {2.2.3}Výsledky}{14}{subsection.2.2.3}%
+\contentsline {section}{\numberline {2.3}Zaměření na přesnost}{15}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}Návrh metody}{15}{subsection.2.3.1}%
+\contentsline {subsection}{\numberline {2.3.2}Implementace}{15}{subsection.2.3.2}%
+\contentsline {subsection}{\numberline {2.3.3}Výsledky}{15}{subsection.2.3.3}%
+\contentsline {chapter}{\numberline {3}Technická dokumentace}{17}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Ukázka sekce}{17}{section.3.1}%
+\contentsline {subsection}{\numberline {3.1.1}A jedné podsekce}{17}{subsection.3.1.1}%
+\contentsline {section}{\numberline {3.2}A další sekce}{18}{section.3.2}%
+\contentsline {chapter}{Závěr}{21}{chapter*.13}%
+\contentsline {chapter}{Seznam použité literatury}{23}{chapter*.14}%
+\contentsline {chapter}{Seznam obrázků}{25}{chapter*.14}%
+\contentsline {chapter}{Seznam tabulek}{26}{chapter*.14}%
