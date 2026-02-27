@@ -1,13 +1,13 @@
 # Fdb version 4
-["biber main"] 1772202592.63082 "main.bcf" "main.bbl" "main" 1772207731.18746 0
-  "main.bcf" 1772207731.05497 108731 da2e77ceb222d469843e9334a739034b "pdflatex"
+["biber main"] 1772202592.63082 "main.bcf" "main.bbl" "main" 1772207956.53514 0
+  "main.bcf" 1772207956.40633 108731 da2e77ceb222d469843e9334a739034b "pdflatex"
   "references.bib" 1772202592.43073 963 ee816de57f3fef2a8ac9a6a00c28b64b ""
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1772207729.0115 "/Users/simonbravek/Projects/simonpose/documentation/main.tex" "main.pdf" "main" 1772207731.1878 0
-  "/Users/simonbravek/Projects/simonpose/documentation/main.tex" 1772207728.79432 14846 b2c8a143b58349cc141d7d996467080d ""
+["pdflatex"] 1772207954.42104 "/Users/simonbravek/Projects/simonpose/documentation/main.tex" "main.pdf" "main" 1772207956.53544 0
+  "/Users/simonbravek/Projects/simonpose/documentation/main.tex" 1772207954.2235 14840 8b65be7e44bb7874443d471708d44ede ""
   "/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/sourcecodepro/a_lutrty.enc" 1558300257 2905 926f570532f1104044846d18d8d97080 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
@@ -232,16 +232,16 @@
   "img/stage_2.png" 1772203781.96592 72533 c656050b1c79600ba7bb20042c923102 ""
   "img/stage_3.png" 1772203831.29166 82613 b5bfd3411d0f238b4d145754dbe3ac9c ""
   "macros.tex" 1772207271.87034 4173 ac62a010f6db0d3f49bca93ffb8a3026 ""
-  "main.aux" 1772207731.04949 4949 38f92efe95b0fad9af4d97af3c476431 "pdflatex"
+  "main.aux" 1772207956.40121 4949 38f92efe95b0fad9af4d97af3c476431 "pdflatex"
   "main.bbl" 1772202594.28327 3616 553294f7385a106381054346c21cc6c6 "biber main"
-  "main.lof" 1772207731.05595 456 9f1e2360e017f7f6ed5f4951e0b490fa "pdflatex"
-  "main.lot" 1772207731.05598 88 b37342d3e7d9464a61b84f32871c0288 "pdflatex"
-  "main.out" 1772207731.05203 3819 de52df5732ab00f56c021378dc6f34ce "pdflatex"
-  "main.run.xml" 1772207731.05584 2306 b6c2027c38014f3e9585c66c5d30b7f0 "pdflatex"
-  "main.tex" 1772207728.79432 14846 b2c8a143b58349cc141d7d996467080d ""
-  "main.toc" 1772207731.05592 2050 4b499366ce81e1e2f3204a1ca90f1f38 "pdflatex"
-  "pdfa.xmpi" 1772207729.6032 5042 dd078da9fd1b0c2a0bf149377bb89dd2 "pdflatex"
-  "titlepage.aux" 1772207730.82729 4055 1692f3652a2214c6b61240b99823860d "pdflatex"
+  "main.lof" 1772207956.40719 456 9f1e2360e017f7f6ed5f4951e0b490fa "pdflatex"
+  "main.lot" 1772207956.40722 88 b37342d3e7d9464a61b84f32871c0288 "pdflatex"
+  "main.out" 1772207956.40333 3819 de52df5732ab00f56c021378dc6f34ce "pdflatex"
+  "main.run.xml" 1772207956.40709 2306 b6c2027c38014f3e9585c66c5d30b7f0 "pdflatex"
+  "main.tex" 1772207954.2235 14840 8b65be7e44bb7874443d471708d44ede ""
+  "main.toc" 1772207956.40717 2050 4b499366ce81e1e2f3204a1ca90f1f38 "pdflatex"
+  "pdfa.xmpi" 1772207954.94477 5042 dc4aeadadd361393cc4af89f18abf53e "pdflatex"
+  "titlepage.aux" 1772207956.18091 4055 1692f3652a2214c6b61240b99823860d "pdflatex"
   "titlepage.tex" 1772116882.8893 1481 a7429226d3e1f160f66d1f876cdd4f8a ""
   "zadani.pdf" 1761519663 177965 1b7a8aaff72fd901d180d621d8dd13ff ""
   (generated)
