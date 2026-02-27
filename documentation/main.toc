@@ -1,13 +1,13 @@
 \babel@toc {czech}{}\relax 
 \contentsline {chapter}{Úvod}{3}{chapter*.7}%
 \contentsline {section}{\numberline {0.1}Analýza postavy v digitálním světě}{3}{section.0.1}%
-\contentsline {section}{\numberline {0.2}Motivace}{3}{section.0.2}%
+\contentsline {section}{\numberline {0.2}Problematika}{3}{section.0.2}%
+\contentsline {section}{\numberline {0.3}Cíl práce}{3}{section.0.3}%
 \contentsline {chapter}{\numberline {1}Teoretická část}{5}{chapter.1}%
 \contentsline {section}{\numberline {1.1}Základní teorie}{5}{section.1.1}%
 \contentsline {subsection}{\numberline {1.1.1}Co je to model?}{5}{subsection.1.1.1}%
 \contentsline {subsection}{\numberline {1.1.2}Odhad 2D a jeho limitace}{5}{subsection.1.1.2}%
 \contentsline {subsection}{\numberline {1.1.3}Od 2D bodů k 3D objemu}{5}{subsection.1.1.3}%
-\contentsline {subsection}{\numberline {1.1.4}Cíl práce}{6}{subsection.1.1.4}%
 \contentsline {section}{\numberline {1.2}Druhy detekcí}{6}{section.1.2}%
 \contentsline {chapter}{\numberline {2}Implementace}{7}{chapter.2}%
 \contentsline {section}{\numberline {2.1}Ukázka sekce}{7}{section.2.1}%

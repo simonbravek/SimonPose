@@ -26,20 +26,20 @@
            familyi={M\bibinitperiod},
            given={Dmytro},
            giveni={D\bibinitperiod}}}%
-        {{hash=7df17ebc3cfb4cf295bff60b579d5638}{%
+        {{hash=83c14354cb5e7cff1e0dfe8edc6b93a7}{%
            family={Matas},
            familyi={M\bibinitperiod},
-           given={Jiri},
+           given={Jiří},
            giveni={J\bibinitperiod}}}%
       }
-      \strng{namehash}{18dad009a7f25e2d904e16254cb1e480}
-      \strng{fullhash}{18dad009a7f25e2d904e16254cb1e480}
-      \strng{fullhashraw}{18dad009a7f25e2d904e16254cb1e480}
-      \strng{bibnamehash}{18dad009a7f25e2d904e16254cb1e480}
-      \strng{authorbibnamehash}{18dad009a7f25e2d904e16254cb1e480}
-      \strng{authornamehash}{18dad009a7f25e2d904e16254cb1e480}
-      \strng{authorfullhash}{18dad009a7f25e2d904e16254cb1e480}
-      \strng{authorfullhashraw}{18dad009a7f25e2d904e16254cb1e480}
+      \strng{namehash}{dbb62bd4e3fff0025606561a78e56c91}
+      \strng{fullhash}{dbb62bd4e3fff0025606561a78e56c91}
+      \strng{fullhashraw}{dbb62bd4e3fff0025606561a78e56c91}
+      \strng{bibnamehash}{dbb62bd4e3fff0025606561a78e56c91}
+      \strng{authorbibnamehash}{dbb62bd4e3fff0025606561a78e56c91}
+      \strng{authornamehash}{dbb62bd4e3fff0025606561a78e56c91}
+      \strng{authorfullhash}{dbb62bd4e3fff0025606561a78e56c91}
+      \strng{authorfullhashraw}{dbb62bd4e3fff0025606561a78e56c91}
       \field{labelalpha}{MM16}
       \field{sortinit}{M}
       \field{sortinithash}{4625c616857f13d17ce56f7d4f97d451}
@@ -68,20 +68,20 @@
     \endentry
     \entry{moravkova2025}{online}{}{}
       \name{author}{1}{}{%
-        {{hash=7b872776d2a461351146c0d35ad24a39}{%
+        {{hash=9020a204672572313b305bb9c5be0ecb}{%
            family={Morávková},
            familyi={M\bibinitperiod},
-           given={Firstname},
-           giveni={F\bibinitperiod}}}%
+           given={Šárka},
+           giveni={Š\bibinitperiod}}}%
       }
-      \strng{namehash}{7b872776d2a461351146c0d35ad24a39}
-      \strng{fullhash}{7b872776d2a461351146c0d35ad24a39}
-      \strng{fullhashraw}{7b872776d2a461351146c0d35ad24a39}
-      \strng{bibnamehash}{7b872776d2a461351146c0d35ad24a39}
-      \strng{authorbibnamehash}{7b872776d2a461351146c0d35ad24a39}
-      \strng{authornamehash}{7b872776d2a461351146c0d35ad24a39}
-      \strng{authorfullhash}{7b872776d2a461351146c0d35ad24a39}
-      \strng{authorfullhashraw}{7b872776d2a461351146c0d35ad24a39}
+      \strng{namehash}{9020a204672572313b305bb9c5be0ecb}
+      \strng{fullhash}{9020a204672572313b305bb9c5be0ecb}
+      \strng{fullhashraw}{9020a204672572313b305bb9c5be0ecb}
+      \strng{bibnamehash}{9020a204672572313b305bb9c5be0ecb}
+      \strng{authorbibnamehash}{9020a204672572313b305bb9c5be0ecb}
+      \strng{authornamehash}{9020a204672572313b305bb9c5be0ecb}
+      \strng{authorfullhash}{9020a204672572313b305bb9c5be0ecb}
+      \strng{authorfullhashraw}{9020a204672572313b305bb9c5be0ecb}
       \field{labelalpha}{Mor25}
       \field{sortinit}{M}
       \field{sortinithash}{4625c616857f13d17ce56f7d4f97d451}
@@ -101,9 +101,6 @@
       \endverb
     \endentry
   \enddatalist
-  \missing{einstein}
-  \missing{knuthwebsite}
-  \missing{latexcompanion}
 \endrefsection
 \endinput
 

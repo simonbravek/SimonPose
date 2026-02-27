@@ -62,10 +62,34 @@ Tyto technologie se dnes nachází již v mnoha podobách a můžou tak pomoci v
 
 Kromě přesnosti těchto metod se vědci čím dál více zaměřují také na rychlost. Mnohé aplikace totiž potřebují živou analýzu videa a to často i z několika kamer najednou. Tak tomu je u autonomního řízení automobilů, které se ukazuje být velkým tahounem tohoto odvětví.
 
-\section{Motivace}
+Právě rozmanitost této disciplíny, její užitečnost a také možnost setkat se s ní do hloubky na FEL ČVUT mě vedlo k její volbě jako tématu mé maturitní práce.
 
+\section{Problematika}
 
+Současné SOTA (State-of-the-Art) modely sice dosahují vynikajících výsledků na laboratorních datasetech, ale často selhávají v reálných podmínkách (in-the-wild). Mezi kritické faktory patří:
 
+\begin{itemize}
+    \item \textbf{Zákryty (Occlusions):} Části těla zakryté předměty nebo jinými částmi těla.
+    \item \textbf{Perspektivní zkreslení:} Extrémní úhly kamery, které deformují vizuální proporce těla.
+    \item \textbf{Vizuální šum:} Volné oblečení nebo špatné světelné podmínky.
+    \item \textbf{Propletení více těl:} Situace v davu, kde není jasné, komu patří jaká část těla a jak je správně rozdělit. 
+\end{itemize}
+
+Právě kombinace modelu SMPL s technologií DensePose (která mapuje pixely přímo na povrch těla) nabízí unikátní cestu, jak tyto problémy řešit skrze hustou korespondenci dat.
+
+\section{Cíl práce}
+
+Cílem této maturitní práce není vytvořit nový, revoluční model, který by překonal stávající vědecké rekordy. Ambicí je metodický průzkum možností, jak stávající proces fittingu (pasování) modelu SMPL do dat z DensePose zpřesnit a učinit jej odolnějším (robustnějším).
+
+Zvolená metodika se opírá o princip Fail-Fast:
+
+\begin{itemize}
+    \item Rychlá formulace hypotéz o vylepšení optimalizačního procesu.
+    \item Implementace prototypů a jejich testování na hraničních případech.
+    \item Analýza selhání jakožto hlavního zdroje poznání.
+\end{itemize}
+
+Výsledkem práce je ucelený přehled vyzkoušených metod, jejich kritické zhodnocení a dokumentace slepých i perspektivních uliček, které mohou sloužit jako inspirace pro další vývoj v oblasti monokulární 3D rekonstrukce člověka.
 
 \chapter{Teoretická část}
 \pagestyle{fancy}
@@ -96,9 +120,6 @@ Tradiční metody odhadu pózy se po léta soustředily na tzv. sparse keypoints
 Samotné rozpoznávání 2D pozice se dostává ke svým limitům také proto, že jejich přesnost se blíží datům na kterých jsou trénovány. 
 \cite{moravkova2025}. 
 Další k rozpoznání 3D pozice těla je zle
-
-\subsection{Cíl práce}
-
 
 
 
@@ -137,7 +158,6 @@ Poslední kapitola obsahuje informace o tom, jak projekt, který v rámci maturi
 Závěr obsahuje shrnutí práce a vyjadřuje se k míře splnění jejího zadání. Dále by se zde mělo objevit sebehodnocení studenta a informace o tom, co nového se naučil a jak vnímal svou práci na projektu.
 
 %%% Seznam použité literatury
-\nocite{einstein}\nocite{latexcompanion}\nocite{knuthwebsite}
 \printbibliography[title={Seznam použité literatury},heading={bibintoc}]
 
 %%% Seznam obrázků
