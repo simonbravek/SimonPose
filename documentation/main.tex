@@ -102,6 +102,11 @@ V této práci se často budu věnovat programům, které využívají metodu st
 
 Dále zvolíme metodu pro výpočet chyby výstupu (loss). Proces generování výstupu opakujeme mnohokrát pro velké množství obrázků a anotací toho. Skupině těchto dat říkáme trénovací dataset. Je nutné mít velké množtví obrázků a anotací ještě před začátkem trénování. Ty pochází v drtivé většině případů od lidských anotátorů a jsou tak velmi drahé. Navíc jsou předmětem lidské chybovosti. Součtem, nebo jinou metodou tak spočítáme ztrátovou funkci (loss funcion) jako metriku chybovosti odhadu našeho modelu od anotací
 
+\subsection{Druhy detekcí}
+
+K tomuto účelu se využívá hned několik metod. Tou úplně nejzákladnější jsou rámečky k ohraničení detekovaných lidí. skládají se ze dvou souřadnic.
+
+
 \subsection{Odhad 2D a jeho limitace}
 
 Tradiční metody odhadu pózy se po léta soustředily na tzv. sparse keypoints -- detekci klíčových bodů, jako jsou lokty, kolena či ramena -- které detekují jako dvojici souřadnic v daném obrázku. Přestože jsou tyto modely (např. OpenPose) rychlé a efektivní, trpí zásadním nedostatkem: ztrátou prostorové informace a tělesného objemu. Zatímco mají perfektní výsledky v laboratorních podmínkách, selhávají v reálných situacích (in-the-wild), kde jim 2D obrázek neposkytuje dost jasné informace pro detekci pozice. Mezi faktory ovlivňující přesnost výstupu patří:
@@ -123,9 +128,68 @@ Další k rozpoznání 3D pozice těla je zle
 
 
 
-\section{Druhy detekcí}
-K tomuto účelu se využívá hned několik metod. Tou úplně nejzákladnější jsou rámečky k ohraničení detekovaných lidí. skládají se ze dvou souřadnic
+\section{Skinned Multi-Person Linear Model (SMPL)}
 
+Přechod od 2D chápání člověka k pochopení objemové struktury lidského těla si vyžaduje zcela nové nástroje. Jedním z nich je způsob jak modelovat lidské tělo v prostoru. Abychom mohli tělo vyrendrovat na obrazovku pomocí standardních postupů, musíme povrch těla zapsat jako množinu bodů a zapamatovat si všechny možné trojice bodů tak, aby nám vzikla síťovina (mesh) reprezentující povrch 3D tělesa. 
+
+Namodelovat realistické lidcké tělo na základě bodů je velmi náročná disciplína. My bychom takové tělo chtěli modelovat automaticky, v reálném čase a s tělesnými proporcemi a pozicí, jakou si zadáme. Proto vznikl SMPL model, který na základě parametrů $\beta$ a $\theta$ vytvoří síťovinu libovolného člověka. 
+
+Celý model těla vzniká takto: 
+
+
+\begin{itemize}
+    \item \textbf{T-pose:} Souřadnic bodů kanonického těla v klidu (tedy univerzálního zvolenéhe těla, které zobrazuje průměrného člověka ve všech proporcích). 
+    \item \textbf{Joints:} Polohy všech kloubů požadované pozice těla. Každý bod na těle je posunut na tomto základě. Poloha všech kloubů je plně závislá na parametru $\theta$. 
+    \item \textbf{Omega:} Reprezentuje tělesné proporce konkrétního člověka.
+    \item \textbf{Propletení více těl:} Situace v davu, kde není jasné, komu patří jaká část těla a jak je správně rozdělit. 
+\end{itemize}
+
+$M(\beta, \theta) = W(T_p(\beta, \theta), J(\beta), \theta, \mathcal{W})$
+Generativní proces modelu SMPL (od šablony přes tvarové a pózové deformace až po skinning) je schematicky znázorněn na obr.~\ref{fig:smpl-stage-1}--\ref{fig:smpl-stage-3}.
+
+
+Začne se se souřadnicemi bodů kanonického těla $\bar{T}$ v klidu (tedy univerzálního zvolenéhe těla, které zobrazuje průměrného člověka ve všech proporcích). Ke každému bodu se následně přičte posunutí na základě parametru tělesných proporcí $\beta$ příspěvkem $B_s(\beta)$. Tak vznikne T-pose správných tělesných proporcí. Také vypočteme počáteční pozici kloubů $J(\beta)$ na základě tělesných proporcí. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{img/stage_1.png}
+    \caption{SMPL -- stage 1}
+    \label{fig:smpl-stage-1}
+\end{figure}
+
+Při pohybu se naše tkáně napínají a ohýbají a s tím musíme počítat i u počítačového modelu člověka. Dále tedy upravíme proporce těla tak, aby odpovídali po pozici do které chceme model dostat tím, že k modelu přidáme příspěvek $B_P(\theta)$ a vznikne tak pozice $T_p(\beta, \theta)$.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{img/stage_2.png}
+    \caption{SMPL -- stage 2}
+    \label{fig:smpl-stage-2}
+\end{figure}
+
+Nakonec se vše poskládá dohromady pomocí funkce $W(\cdot)$ ještě s konečnou pozicí končetin $\theta$ a maticí $\mathcal{W}$. Tato matice spolu s $B_s(\beta)$ a $B_p(\theta)$ jsou natrénované hodnoty na tisících lidských skenů. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{img/stage_3.png}
+    \caption{SMPL -- stage 3: aplikace linear blend skinningu $W(\cdot)$ a výsledná póza těla v prostoru.}
+    \label{fig:smpl-stage-3}
+\end{figure}
+
+Tento model má výhodu v tom, že parametry $\theta$ a $\beta$ usměrní výslednek tak, aby bylo velmi těžké zdeformovat obrázek do nelidských proporcí. Zároveň však dokáže popsat celou řadu lidských těl. Je díky tomu vhodná pro
+
+Tato knihovna je pro komerční účely zpoplatněná, ale pro vědecké účely je zdarma a stačí se registrovat na https://smpl.is.tue.mpg.de/index.html. Díky tomu se z ní stal standard v oblasti počítačového vidění. 
+
+\FloatBarrier
+
+\section{DensePose}
+
+\section{Navržené metody}
+
+\subsection{Vzdálenost bodu od těla}
+
+\subsection{Euklidovká vzdálenost}
+
+\subsection{Zaměření na přesnost}
 
 \chapter{Implementace}
 
