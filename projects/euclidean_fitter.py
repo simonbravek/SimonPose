@@ -360,7 +360,7 @@ for image_id in tqdm(image_ids, position=0, desc="Images", disable=not ISATTY):
         # TODO filter out poor detections
         break
 
-    loss_improvement = np.array(final_losses) / np.array(beginning_losses)
+    loss_remaining = np.array(final_losses) / np.array(beginning_losses)
 
     plt.figure(tight_layout=True)
     plt.hist(final_losses, bins=10)
@@ -372,12 +372,12 @@ for image_id in tqdm(image_ids, position=0, desc="Images", disable=not ISATTY):
     plt.close()
 
     plt.figure(tight_layout=True)
-    plt.hist(loss_improvement, bins=10)
-    plt.xlabel('Improvement from heuristic guess (%)')
+    plt.hist(loss_remaining, bins=10)
+    plt.xlabel('Remaining from heuristic guess (%)')
     plt.ylabel('Number of images')
-    plt.title('Distribution of loss improvement across images')
+    plt.title('Distribution of loss remaining across images')
     plt.grid()
-    plt.savefig(OUTPUT_DIR / 'loss_improvement_histogram.png')
+    plt.savefig(OUTPUT_DIR / 'loss_remaining_histogram.png')
     plt.close()
 
 
