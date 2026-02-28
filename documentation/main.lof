@@ -1,9 +1,10 @@
 \babel@toc {czech}{}\relax 
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {1.1}{\ignorespaces SMPL -- stage 1}}{7}{figure.caption.8}%
-\contentsline {figure}{\numberline {1.2}{\ignorespaces SMPL -- stage 2}}{7}{figure.caption.9}%
-\contentsline {figure}{\numberline {1.3}{\ignorespaces SMPL -- stage 3}}{8}{figure.caption.10}%
-\contentsline {figure}{\numberline {1.4}{\ignorespaces DensePose -- DenseAnnoFigue, Zobrazuje korespondenci 2D pixelu s vybraným bodem na kanonické 3D síti lidského těla.}}{9}{figure.caption.11}%
-\contentsline {figure}{\numberline {1.5}{\ignorespaces DensePose -- Output, Použili jsme barevnou mapu (colormap) Jet pro ilustraci. Ukazuje neplynulou segmentaci. Také artefakt na pravé noze člověka. Obrázek pochází z datasetu COCO.}}{11}{figure.caption.12}%
+\contentsline {figure}{\numberline {1.1}{\ignorespaces SMPL -- stage 1}}{9}{figure.caption.10}%
+\contentsline {figure}{\numberline {1.2}{\ignorespaces SMPL -- stage 2}}{9}{figure.caption.11}%
+\contentsline {figure}{\numberline {1.3}{\ignorespaces SMPL -- stage 3}}{10}{figure.caption.12}%
+\contentsline {figure}{\numberline {1.4}{\ignorespaces DensePose -- DenseAnnoFigue, Zobrazuje korespondenci 2D pixelu s vybraným bodem na kanonické 3D síti lidského těla.}}{11}{figure.caption.13}%
+\contentsline {figure}{\numberline {1.5}{\ignorespaces DensePose -- Output, Použili jsme barevnou mapu (colormap) Jet pro ilustraci. Ukazuje neplynulou segmentaci. Také artefakt na pravé noze člověka. Obrázek pochází z datasetu COCO.}}{13}{figure.caption.14}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Hlavní struktura repozitáře}}{19}{figure.caption.15}%
