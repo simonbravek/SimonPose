@@ -238,7 +238,7 @@ Právě tyto slabiny jsou hlavním důvodem, proč jsem se rozhodl na DensePose 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.95\textwidth]{img/densepose_showcase.png}
-    \caption{DensePose -- Showcase, Použili jsme barevnou mapu (colormap) Jet pro ilustraci. Obě nohy bledě modrou a tedy detekovány jako pravé. Útržek tmavě modré a tedy jiné končetiny je vidět vlevo a odporuje spojitosti těla. Vpravo na obrázku je zase vidět problém s "lupínky".}
+    \caption{DensePose -- Showcase, Použili jsme barevnou mapu (colormap) Jet pro ilustraci. Obě nohy bledě modrou a tedy detekovány jako pravé. Útržek tmavě modré a tedy jiné končetiny je vidět vlevo a odporuje spojitosti těla. Vpravo na obrázku je zase vidět problém s \enquote{lupínky}.}
     \label{fig:densepose-showcase}
 \end{figure}
 
@@ -255,8 +255,8 @@ Nejdříve jsem se rozhodl věnovat optimalizační úloze, kde zvolím nějakou
 DensePose v2 (CSE) mi pro každý pixel postavy nevrátí jen informaci „tady je člověk“, ale také odhad „kde na kanonickém těle tento pixel leží“. Konkrétně: DensePose pracuje v rámci ohraničujícího rámečku (bounding boxu) detekované osoby a vytvoří 
 
 \begin{itemize}
-  \item \textbf{masku postavy $S$} a 
-  \item \textbf{embedding $E$} pro každý pixel.
+    \item \textbf{masku postavy $S$} a 
+    \item \textbf{embedding $E$} pro každý pixel.
 \end{itemize}
 
 Maska je množina pixelů, které DensePose označí jako tělo. Pro každý pixel $p \in S$ DensePose predikuje vektor $\mathbf{e}_p \in \mathbb{R}^D$ (embedding), kde $D$ je pevně daná dimenze (typicky desítky čísel).
@@ -294,7 +294,7 @@ Hlavní očekávaný přínos je v tom, že SMPL funguje jako humanoidní omezen
 
 V implementaci jsem se snažil co nejpříměji zrealizovat veličiny z návrhu metody: z DensePose beru masku pixelů těla $S$ a embeddingy $\mathbf{e}_p$, ze SMPL v každé iteraci získám projekci do obrazu a pro stejné pixely určuji, který bod na síťovině je z pohledu kamery skutečně vidět. Teprve potom má smysl embeddingy porovnávat, protože bez ošetření zákrytů by do stejné oblasti obrazu „padaly“ i části těla, které kamera ve skutečnosti nevidí.
 
-Nejdříve si připravím DensePose výstup pro jednu detekovanou osobu (bounding box, maska $S$ a embedding pole). SMPL inicializuji pouze heuristicky v neutrální póze a k detekci jej přiblížím hrubým odhadem posunu pomocí \texttt{get\_translation} v \texttt{common/utils.py}. Tato inicializace je čistě praktická: cílem není odhadnout přesnou pozici, ale dostat model do rozumné hloubky a měřítka, aby optimalizace nezačínala v degenerovaném stavu. Pro to, aby moje metoda začala fungovat mi stačí rozumný překryv těl a dále by se měl program optimalizovat sám. 
+Nejdříve si připravím DensePose výstup pro jednu detekovanou osobu (bounding box, maska $S$ a embedding pole). SMPL inicializuji pouze heuristicky v neutrální póze a k detekci jej přiblížím hrubým odhadem posunu pomocí \code{get_translation} v \code{common/utils.py}. Tato inicializace je čistě praktická: cílem není odhadnout přesnou pozici, ale dostat model do rozumné hloubky a měřítka, aby optimalizace nezačínala v degenerovaném stavu. Pro to, aby moje metoda začala fungovat mi stačí rozumný překryv těl a dále by se měl program optimalizovat sám. 
 
 \begin{figure}[htbp]
     \centering
@@ -303,11 +303,11 @@ Nejdříve si připravím DensePose výstup pro jednu detekovanou osobu (boundin
     \label{fig:inicializade-smpl}
 \end{figure}
 
-Pro projekci používám matici intrinsics $K$ sestavenou funkcí \texttt{get\_camera\_intrinsics} (také v common/utils.py). V kódu je použita varianta \texttt{K\_flipped}, která odpovídá obrazovým souřadnicím (osa $y$ roste směrem dolů), takže se vyhnu časté chybě, kdy se render „zrcadlí“ přes vodorovnou osu. Zároveň jsem musel explicitně ošetřit body za kamerou: čistě matematicky projekce vrátí 2D souřadnice i pro body s $z \le 0$, ale tyto body jsou fyzikálně neviditelné a při optimalizaci působí jako falešné korespondence. Proto v části, která počítá viditelnost, filtruji průsečíky pod minimální hloubkou (v implementaci je na to parametr \texttt{min\_depth}).
+Pro projekci používám matici intrinsics $K$ sestavenou funkcí \code{get_camera_intrinsics} (také v common/utils.py). V kódu je použita varianta \code{K_flipped}, která odpovídá obrazovým souřadnicím (osa $y$ roste směrem dolů), takže se vyhnu časté chybě, kdy se render „zrcadlí“ přes vodorovnou osu. Zároveň jsem musel explicitně ošetřit body za kamerou: čistě matematicky projekce vrátí 2D souřadnice i pro body s $z \le 0$, ale tyto body jsou fyzikálně neviditelné a při optimalizaci působí jako falešné korespondence. Proto v části, která počítá viditelnost, filtruji průsečíky pod minimální hloubkou (v implementaci je na to parametr \code{min_depth}).
 
-Viditelnost jsem realizoval ray tracingem ve funkci \texttt{visible\_vertices\_gpu}. Prakticky to znamená: pro každý dotazovaný pixel hledám trojúhelník sítě, jehož projekce pixel obsahuje, a z kandidátů vyberu ten s nejmenší hloubkou (nejbližší kameře). Původně jsem chtěl využít barycentrické váhy a embedding interpolovat uvnitř trojúhelníku tak, jak je to v návrhu metody. V prototypu jsem ale nakonec zvolil jednodušší kompromis: z viditelného trojúhelníku vybírám jeden reprezentativní vrchol (nejbližší bodu průsečíku) a embedding beru přímo z jeho předpočítané tabulky. Tím se ztrácí část „plynulosti“ vůči parametrům, ale implementace je výrazně jednodušší a paměťově méně náročná.
+Viditelnost jsem realizoval ray tracingem ve funkci \code{visible_vertices_gpu}. Prakticky to znamená: pro každý dotazovaný pixel hledám trojúhelník sítě, jehož projekce pixel obsahuje, a z kandidátů vyberu ten s nejmenší hloubkou (nejbližší kameře). Původně jsem chtěl využít barycentrické váhy a embedding interpolovat uvnitř trojúhelníku tak, jak je to v návrhu metody. V prototypu jsem ale nakonec zvolil jednodušší kompromis: z viditelného trojúhelníku vybírám jeden reprezentativní vrchol (nejbližší bodu průsečíku) a embedding beru přímo z jeho předpočítané tabulky. Tím se ztrácí část „plynulosti“ vůči parametrům, ale implementace je výrazně jednodušší a paměťově méně náročná.
 
-Výpočet viditelnosti jsem nejdříve napsal na CPU v NumPy, ale rychle se ukázalo, že je to pro reálné rozlišení příliš pomalé. Přepsání do PyTorch mi umožnilo využít GPU a hlavně vektorizovat celé bloky výpočtu: místo smyček nad pixely se pracuje s tenzory a maskami (typicky tabulka dotazovaných pixelů vůči kandidátním trojúhelníkům), což je v \texttt{common/utils.py} vidět i podle značení tvarů v komentářích. Parametry SMPL pak optimalizuji gradientně pomocí Adam, stejně jako v \texttt{projects/euclidean\_fitter.py}. Optimalizované proměnné jsou globální orientace, posun, póza $\theta$ a tvar $\beta$; v každé iteraci přepočtu síťovinu, projekci, viditelnost a následně minimalizuji ztrátu založenou na podobnosti embeddingů na množině pixelů $p \in S$. Počet iterací jsem určil experimentálně na 400. Při větším počtu iterací již nepozoruji žádnou změnu (viz \ref{fig:ztrata-podle-iterace}) hodnoty ztrátové funkce a zbytečně bych prodlužoval čas čekání na výstup. 
+Výpočet viditelnosti jsem nejdříve napsal na CPU v NumPy, ale rychle se ukázalo, že je to pro reálné rozlišení příliš pomalé. Přepsání do PyTorch mi umožnilo využít GPU a hlavně vektorizovat celé bloky výpočtu: místo smyček nad pixely se pracuje s tenzory a maskami (typicky tabulka dotazovaných pixelů vůči kandidátním trojúhelníkům), což je v \code{common/utils.py} vidět i podle značení tvarů v komentářích. Parametry SMPL pak optimalizuji gradientně pomocí Adam, stejně jako v \code{projects/euclidean_fitter.py}. Optimalizované proměnné jsou globální orientace, posun, póza $\theta$ a tvar $\beta$; v každé iteraci přepočtu síťovinu, projekci, viditelnost a následně minimalizuji ztrátu založenou na podobnosti embeddingů na množině pixelů $p \in S$. Počet iterací jsem určil experimentálně na 400. Při větším počtu iterací již nepozoruji žádnou změnu (viz \ref{fig:ztrata-podle-iterace}) hodnoty ztrátové funkce a zbytečně bych prodlužoval čas čekání na výstup. 
 
 \begin{figure}[htbp]
     \centering
@@ -325,7 +325,7 @@ Z hlediska cíle maturitní práce pro mě bylo klíčové mít metodu, se ktero
 
 Proto jsem tuto variantu vyhodnotil jako slepou uličku a přešel jsem k jednoduššímu měření ztráty v obraze pomocí euklidovské vzdálenosti, které sice obětuje část původní elegance, ale výrazně zlepšuje stabilitu experimentů.
 
-Následující metoda \texttt{Euklidovský fitter} vznikla jako zjednodušená varianta předchozího prototypu. Kompletní implementace je v souboru \texttt{projects/euclidean\_fitter.py}; v \texttt{common/utils.py} pak zůstaly pomocné funkce pro práci s projekcí a výpočtem ztráty.
+ Následující metoda \code{Euklidovský fitter} vznikla jako zjednodušená varianta předchozího prototypu. Kompletní implementace je v souboru \code{projects/euclidean_fitter.py}; v \code{common/utils.py} pak zůstaly pomocné funkce pro práci s projekcí a výpočtem ztráty.
 
 \section{Euklidovský fitter}
 
@@ -347,7 +347,7 @@ Pro čitelnost doplním význam symbolů, které v této části používám:
     \item $i$ -- index vrcholu SMPL (vrcholy si lze představit jako body sítě povrchu těla).
     \item $\mathbf{v}_i$ -- předpočítaný embedding vrcholu $i$.
     \item $\hat{\mathbf{e}}$ -- normalizovaný embedding (vektor s délkou 1); díky tomu je skalární součin $\langle \cdot, \cdot \rangle$ ekvivalentní kosinové podobnosti.
-    \item $\arg\max$ -- operace "vyber index, pro který je výraz největší" (zde tedy nejpodobnější vrchol).
+    \item $\arg\max$ -- operace \enquote{vyber index, pro který je výraz největší} (zde tedy nejpodobnější vrchol).
     \item $I(p)$ -- index vrcholu, který DensePose pixelu $p$ přiřadí (vybere se ten nejpodobnější podle embeddingu).
     \item $\mathbf{u}_p$ -- 2D souřadnice pixelu $p$ v rámci bounding boxu (tj. dvojice $(x,y)$ v pixelech).
     \item $V$ -- množina vrcholů SMPL, které v daném kroku porovnávám (typicky všechny vrcholy, nebo jen vybraná část těla).
@@ -384,20 +384,20 @@ Metoda se tedy shoduje s předchozím přístupem v tom, že stále využívá D
 
 \subsection{Implementace}
 
-Implementace v \texttt{projects/euclidean\_fitter.py} zachovává stejnou kostru jako předchozí metoda: z detekce DensePose vezmu bounding box, masku $S$ a embeddingy, SMPL inicializuji v neutrální póze a optimalizuji proměnné \texttt{global\_orient}, \texttt{transl}, \texttt{pose} a \texttt{betas} pomocí Adam. Zásadní rozdíl je pouze v tom, jakým způsobem z těchto dat vytvořím ztrátu.
+ Implementace v \code{projects/euclidean_fitter.py} zachovává stejnou kostru jako předchozí metoda: z detekce DensePose vezmu bounding box, masku $S$ a embeddingy, SMPL inicializuji v neutrální póze a optimalizuji proměnné \code{global_orient}, \code{transl}, \code{pose} a \code{betas} pomocí Adam. Zásadní rozdíl je pouze v tom, jakým způsobem z těchto dat vytvořím ztrátu.
 
-Nejdříve pro každou detekovanou osobu převedu DensePose embeddingy na mapu indexů vrcholů $I(p)$. To zajišťuje funkce \texttt{get\_closest\_vertices\_mask\_from\_ES}, která pro každý pixel v masce vybere vrchol s nejvyšší podobností embeddingu. V kódu tuto mapu počítám ve dvou rozlišeních: v původním rozlišení bounding boxu pro vizualizaci a v menším rozlišení pro samotný výpočet ztráty. Rozlišení pro loss volím tak, aby mělo přibližně konstantní plochu (proměnná \texttt{LOSS\_AREA}); tím udržuji počet bodů v $S$ a výpočetní náročnost přibližně stejnou napříč různě velkými detekcemi.
+ Nejdříve pro každou detekovanou osobu převedu DensePose embeddingy na mapu indexů vrcholů $I(p)$. To zajišťuje funkce \code{get_closest_vertices_mask_from_ES}, která pro každý pixel v masce vybere vrchol s nejvyšší podobností embeddingu. V kódu tuto mapu počítám ve dvou rozlišeních: v původním rozlišení bounding boxu pro vizualizaci a v menším rozlišení pro samotný výpočet ztráty. Rozlišení pro loss volím tak, aby mělo přibližně konstantní plochu (proměnná \code{LOSS_AREA}); tím udržuji počet bodů v $S$ a výpočetní náročnost přibližně stejnou napříč různě velkými detekcemi.
 
 Z mapy $I(p)$ si pak připravím dvě pole:
 \begin{itemize}
-    \item \textbf{\texttt{E\_indices}} -- seznam vrcholových indexů $I(p)$ pro všechny pixely $p \in S$,
-    \item \textbf{\texttt{E\_coordinates}} -- odpovídající 2D souřadnice $\mathbf{u}_p$ v souřadnicích zmenšeného bounding boxu.
+    \item \textbf{\code{E_indices}} -- seznam vrcholových indexů $I(p)$ pro všechny pixely $p \in S$,
+    \item \textbf{\code{E_coordinates}} -- odpovídající 2D souřadnice $\mathbf{u}_p$ v souřadnicích zmenšeného bounding boxu.
 \end{itemize}
-Volitelně mohu omezit optimalizaci pouze na torso (\texttt{TORSO\_MASK}), čímž snížím vliv typicky nejhůře predikovaných končetin a zároveň zmenším množinu vrcholů, se kterou loss pracuje.
+Volitelně mohu omezit optimalizaci pouze na torso (\code{TORSO_MASK}), čímž snížím vliv typicky nejhůře predikovaných končetin a zároveň zmenším množinu vrcholů, se kterou loss pracuje.
 
-V každé iteraci vyrenderuji (tj. spočtu) aktuální SMPL vrcholy, promítnu je do obrazu pomocí intrinsics matice $K$ z \texttt{get\_camera\_intrinsics} a převedu je do stejné souřadnicové soustavy jako DensePose body: odečtu levý horní roh bounding boxu a aplikuji stejné škálování. Výsledkem je pole \texttt{SMPL\_coordinates} s body $\mathbf{x}_i$.
+V každé iteraci vyrenderuji (tj. spočtu) aktuální SMPL vrcholy, promítnu je do obrazu pomocí intrinsics matice $K$ z \code{get_camera_intrinsics} a převedu je do stejné souřadnicové soustavy jako DensePose body: odečtu levý horní roh bounding boxu a aplikuji stejné škálování. Výsledkem je pole \code{SMPL_coordinates} s body $\mathbf{x}_i$.
 
-Samotnou ztrátu počítá funkce \texttt{euclid\_loss\_gpu} v \texttt{common/utils.py}. Naivní CPU varianta by pro každý vrchol $i$ musela prohledat všechny DensePose pixely a najít ty, které mají $I(p)=i$, což vede k pomalým vnořeným smyčkám. GPU verzi jsem proto napsal v PyTorch tak, aby byla plně vektorizovaná: vytvořím tabulku shod indexů (masku tvaru $E \times S$), pomocí broadcastingu spočtu euklidovské vzdálenosti pouze pro shodné dvojice a pro každý vrchol vezmu minimum. Tato část už je analogická postupu z předchozí sekce, kde jsem kvůli výkonu také přecházel od smyček k tenzorovým operacím na GPU.
+Samotnou ztrátu počítá funkce \code{euclid_loss_gpu} v \code{common/utils.py}. Naivní CPU varianta by pro každý vrchol $i$ musela prohledat všechny DensePose pixely a najít ty, které mají $I(p)=i$, což vede k pomalým vnořeným smyčkám. GPU verzi jsem proto napsal v PyTorch tak, aby byla plně vektorizovaná: vytvořím tabulku shod indexů (masku tvaru $E \times S$), pomocí broadcastingu spočtu euklidovské vzdálenosti pouze pro shodné dvojice a pro každý vrchol vezmu minimum. Tato část už je analogická postupu z předchozí sekce, kde jsem kvůli výkonu také přecházel od smyček k tenzorovým operacím na GPU.
 
 \subsection{Hodnocení a výsledky}
 
@@ -443,13 +443,13 @@ I za zkoušených podmínek se přibližně u třetiny datasetu podařilo dostat
 
 Celkově tato metoda splnila hlavní cíl, který jsem od ní očekával: oproti předchozí variantě je výrazně jednodušší, stabilnější na implementaci a umožňuje rychleji provádět experimenty. Její limity jsou ale zřetelné --- kvalita výsledku je stále silně závislá na kvalitě DensePose korespondencí a na inicializaci globální transformace. Pro další práci proto dává smysl soustředit se právě na tyto dvě části (lepší inicializace a robustnější práce s chybnými korespondencemi), protože samotná ztráta založená na euklidovské vzdálenosti se v praxi chová předvídatelně a je dobře optimalizovatelná.
 
-Zároveň zde stále platí, že se všemi korespondencemi zacházím stejně: vrchol, který DensePose přiřadí velmi konzistentně, má stejnou „váhu“ jako vrchol, který je v masce rozhozený po více místech. Právě snaha odlišit stabilní korespondence od zjevně problematických mě přivedla k následující metodě \texttt{Precizní fitter}.
+Zároveň zde stále platí, že se všemi korespondencemi zacházím stejně: vrchol, který DensePose přiřadí velmi konzistentně, má stejnou „váhu“ jako vrchol, který je v masce rozhozený po více místech. Právě snaha odlišit stabilní korespondence od zjevně problematických mě přivedla k následující metodě \code{Precizní fitter}.
 
 \section{Precizní fitter}
 
 \subsection{Návrh metody}
 
-Precizní fitter je pokus o řešení hlavního nedostatku předchozí metody: v okamžiku, kdy DensePose udělá zásadní chybu v korespondencích (např. označí obě nohy jako levou), dostává optimalizace protichůdné informace a "neví", kam danou končetinu napasovat. To je dobře vidět i na případech typu Obrázku~\ref{fig:method-2-difficult-scene}, kde špatné korespondence vedou fitting do nelidského lokálního minima.
+Precizní fitter je pokus o řešení hlavního nedostatku předchozí metody: v okamžiku, kdy DensePose udělá zásadní chybu v korespondencích (např. označí obě nohy jako levou), dostává optimalizace protichůdné informace a \enquote{neví}, kam danou končetinu napasovat. To je dobře vidět i na případech typu Obrázku~\ref{fig:method-2-difficult-scene}, kde špatné korespondence vedou fitting do nelidského lokálního minima.
 
 Základní hypotéza této metody je, že ne všechny DensePose korespondence jsou stejně důvěryhodné, a že část šumu lze odfiltrovat ještě před samotným fittingem. Zjednodušeně: pokud DensePose přiřazuje jeden SMPL vrchol „na více místech najednou“, je to podezřelé. Zavádím proto pojem \emph{přesnost bodu} jako míru toho, jak moc jsou pixely s totožným vrcholovým indexem v obraze rozptýlené.
 
@@ -474,7 +474,7 @@ Formálně tedy pro každý vrchol $i$ sesbírám pixely
 \[
 P_i = \{p \in S\;|\; I(p)=i\}.
 \]
-Pokud DensePose mapuje konzistentně, pak by pixely z $P_i$ měly tvořit malou, souvislou oblast. Naopak při chybách typu prohození končetin, "lupínků" a šumu na hranách masky se stejný index $i$ začne objevovat na více nesouvisejících místech a $P_i$ bude rozptýlené.
+Pokud DensePose mapuje konzistentně, pak by pixely z $P_i$ měly tvořit malou, souvislou oblast. Naopak při chybách typu prohození končetin, \enquote{lupínků} a šumu na hranách masky se stejný index $i$ začne objevovat na více nesouvisejících místech a $P_i$ bude rozptýlené.
 
 Přesnost bodu měřím přes střed $\boldsymbol{\mu}_i$ a rozptyl $\sigma_i$:
 \[
@@ -499,7 +499,7 @@ Váhy následně použiji buď k výběru \emph{nejpřesnějších bodů} (např
 \]
 Zde $V^{*}$ označuje vrcholy, které se v dané detekci vůbec objevily (tj. mají $|P_i|>0$). Výraz $\min_{p\in P_i}$ znamená, že pokud DensePose přiřadí vrcholu $i$ více pixelů, beru z nich ten, který je projekci $\mathbf{x}_i$ nejblíže. Dělení součtem vah $\sum_{i\in V^{*}} w_i$ je pouze normalizace: ztráta pak zůstává ve srovnatelné škále i v případech, kdy se mezi snímky liší počet použitých vrcholů.
 
-Intuice zůstává stejná: SMPL se nejdříve "chytí" stabilních částí (typicky torso) a nekonzistentní korespondence na končetinách přestanou optimalizaci dominovat; zbytek pózy pak musí vyplynout z humanoidních omezení SMPL a regularizace.
+Intuice zůstává stejná: SMPL se nejdříve \enquote{chytí} stabilních částí (typicky torso) a nekonzistentní korespondence na končetinách přestanou optimalizaci dominovat; zbytek pózy pak musí vyplynout z humanoidních omezení SMPL a regularizace.
 
 \subsection{Postup implementace}
 
@@ -509,21 +509,21 @@ Než jsem metodu napojil na samotný fitting, chtěl jsem ověřit dvě praktick
     \item Zda jsou \emph{přesné body} rozptýlené po celém těle tak, aby mohly tvořit dostatečnou oporu pro rekonstrukci celé pózy?
 \end{enumerate}
 
-Tento krok jsem implementoval jako samostatnou analýzu v souboru \texttt{projects/precission\_fitter.py}. Skript prochází anotace z COCO DensePose (minival), pro vybrané osoby spustí DensePose v2 (CSE) a pro každý pixel v masce $S$ určí nejbližší vrchol $I(p)$ pomocí funkce \texttt{get\_closest\_vertices\_mask\_from\_ES}. Následně pro každý vrchol $i$ spočtu $|P_i|$, průměrnou pozici $\boldsymbol{\mu}_i$ a rozptyl $\sigma_i$.
+ Tento krok jsem implementoval jako samostatnou analýzu v souboru \code{projects/precission_fitter.py}. Skript prochází anotace z COCO DensePose (minival), pro vybrané osoby spustí DensePose v2 (CSE) a pro každý pixel v masce $S$ určí nejbližší vrchol $I(p)$ pomocí funkce \code{get_closest_vertices_mask_from_ES}. Následně pro každý vrchol $i$ spočtu $|P_i|$, průměrnou pozici $\boldsymbol{\mu}_i$ a rozptyl $\sigma_i$.
 
-Výpočet rozptylu je v prototypu plně vektorizovaný v PyTorch a běží na GPU. Využívám \texttt{torch.bincount} k tomu, abych pro každý index $i$ získal (1) počet přiřazení, (2) součet $x$ a $y$ souřadnic a (3) součet kvadratických odchylek od průměru, ze kterého vyjde směrodatná odchylka. Výsledky ukládám jako diagnostické vizualizace: (a) překryv DensePose mapování v obraze a (b) 3D vizualizaci SMPL síťoviny, kde jsou vrcholy obarvené podle $\sigma_i$. To mi umožňuje rychle zjistit, zda se "nízký rozptyl" objevuje jen na malé části těla, nebo zda je tato informace použitelná pro fitting jako celek.
+Výpočet rozptylu je v prototypu plně vektorizovaný v PyTorch a běží na GPU. Využívám \code{torch.bincount} k tomu, abych pro každý index $i$ získal (1) počet přiřazení, (2) součet $x$ a $y$ souřadnic a (3) součet kvadratických odchylek od průměru, ze kterého vyjde směrodatná odchylka. Výsledky ukládám jako diagnostické vizualizace: (a) překryv DensePose mapování v obraze a (b) 3D vizualizaci SMPL síťoviny, kde jsou vrcholy obarvené podle $\sigma_i$. To mi umožňuje rychle zjistit, zda se \enquote{nízký rozptyl} objevuje jen na malé části těla, nebo zda je tato informace použitelná pro fitting jako celek.
 
-V této fázi jsem také uvažoval o zvýšení rozlišení, do kterého DensePose výstup přepisuji (resp. o normalizaci měřítka bounding boxu), protože $\sigma_i$ je v pixelech a bez škálování závisí na velikosti detekce. V kódu je tento směr naznačen konstantou \texttt{LOSS\_AREA}, nicméně plné napojení na zbytek pipeline (volba normalizace, prahování $|P_i|$ a definice vah $w_i$) jsem už do odevzdání nestihl.
+V této fázi jsem také uvažoval o zvýšení rozlišení, do kterého DensePose výstup přepisuji (resp. o normalizaci měřítka bounding boxu), protože $\sigma_i$ je v pixelech a bez škálování závisí na velikosti detekce. V kódu je tento směr naznačen konstantou \code{LOSS_AREA}, nicméně plné napojení na zbytek pipeline (volba normalizace, prahování $|P_i|$ a definice vah $w_i$) jsem už do odevzdání nestihl.
 
-Je důležité zdůraznit, že \texttt{projects/precission\_fitter.py} proto není "hotový fitter" v tom smyslu, že by optimalizoval parametry SMPL. Jde o rozpracovaný prototyp pro měření a vizualizaci stability DensePose korespondencí, který měl sloužit jako podklad pro finální implementaci vážené ztráty.
+Je důležité zdůraznit, že \code{projects/precission_fitter.py} proto není \enquote{hotový fitter} v tom smyslu, že by optimalizoval parametry SMPL. Jde o rozpracovaný prototyp pro měření a vizualizaci stability DensePose korespondencí, který měl sloužit jako podklad pro finální implementaci vážené ztráty.
 
 \subsection{Diskuse}
 
 Očekávaný přínos této metody je vyšší robustnost vůči typickým chybám DensePose. Euklidovský fitter pracuje s korespondencemi $I(p)$ jako s fakty; precizní fitter se je naopak snaží doplnit o jednoduchý odhad důvěryhodnosti. Pokud rozptyl opravdu koreluje se správností, pak vážením (nebo výběrem pouze nejpřesnějších bodů) snížím vliv nekonzistentních částí, které jinak optimalizaci tlačí do špatných řešení.
 
-Současně jde o metodu s jasnými riziky. Nízký rozptyl nemusí znamenat, že je korespondence správná --- může jít i o konzistentní, ale systematicky špatné mapování. Rozptyl je navíc nespolehlivý pro vrcholy s malým počtem pixelů ($|P_i|$) a bez normalizace je závislý na velikosti bounding boxu. Hrozí také, že "nejpřesnější" body budou koncentrované jen na torzu, a póza končetin zůstane podurčená; v takovém případě by bylo potřeba doplnit výběr o podmínku pokrytí více částí těla nebo kombinovat váhy s dalšími regularizačními členy.
+Současně jde o metodu s jasnými riziky. Nízký rozptyl nemusí znamenat, že je korespondence správná --- může jít i o konzistentní, ale systematicky špatné mapování. Rozptyl je navíc nespolehlivý pro vrcholy s malým počtem pixelů ($|P_i|$) a bez normalizace je závislý na velikosti bounding boxu. Hrozí také, že \enquote{nejpřesnější} body budou koncentrované jen na torzu, a póza končetin zůstane podurčená; v takovém případě by bylo potřeba doplnit výběr o podmínku pokrytí více částí těla nebo kombinovat váhy s dalšími regularizačními členy.
 
-I přes nedokončený stav považuji za důležité tuto metodu i zdrojový kód sdílet. Tato práce je záměrně explorativní a je postavená na principu Fail-Fast: cílem není prezentovat pouze "hotové" výsledky, ale také transparentně zdokumentovat slibné směry a důvody, proč se je nepodařilo dotáhnout v rámci časového rozsahu maturitní práce. Soubor \texttt{projects/precission\_fitter.py} zachycuje klíčový krok této myšlenky (definici a výpočet rozptylu $\sigma_i$ a jeho vizualizaci) a poskytuje konkrétní výchozí bod pro budoucí navázání.
+I přes nedokončený stav považuji za důležité tuto metodu i zdrojový kód sdílet. Tato práce je záměrně explorativní a je postavená na principu Fail-Fast: cílem není prezentovat pouze \enquote{hotové} výsledky, ale také transparentně zdokumentovat slibné směry a důvody, proč se je nepodařilo dotáhnout v rámci časového rozsahu maturitní práce. Soubor \code{projects/precission_fitter.py} zachycuje klíčový krok této myšlenky (definici a výpočet rozptylu $\sigma_i$ a jeho vizualizaci) a poskytuje konkrétní výchozí bod pro budoucí navázání.
 
 Jako přirozené pokračování bych nejprve ověřil samotnou hypotézu kvantitativně: na anotovaných datech porovnat $\sigma_i$ se skutečnou chybovostí přiřazení vrcholů (DensePose dataset obsahuje i anotace na úrovni vrcholů) a určit rozumné prahy a tvar váhové funkce. Teprve potom dává smysl váhy $w_i$ integrovat do fittingu a porovnat úspěšnost a stabilitu optimalizace vůči euklidovskému fitteru.
 
@@ -531,9 +531,9 @@ Jako přirozené pokračování bych nejprve ověřil samotnou hypotézu kvantit
 
 \chapter{Technická dokumentace}
 
-Tato kapitola slouží jako praktický návod k instalaci a spuštění repozitáře \textbf{SimonPose}, který vznikl jako doprovod k této maturitní práci. Projekt je výzkumný prototyp: není zamýšlen jako obecná knihovna a jeho primárním rozhraním jsou spustitelné skripty v adresáři \texttt{projects/}.
+Tato kapitola slouží jako praktický návod k instalaci a spuštění repozitáře \textbf{SimonPose}, který vznikl jako doprovod k této maturitní práci. Projekt je výzkumný prototyp: není zamýšlen jako obecná knihovna a jeho primárním rozhraním jsou spustitelné skripty v adresáři \code{projects/}.
 
-Pro běžnou práci jsem si v repozitáři připravil i stručnou uživatelskou dokumentaci v adresáři \texttt{docs/} (index \texttt{docs/README.md}). Ta je udržovaná spolu se zdrojovým kódem; v této kapitole proto uvádím minimální, samostatně použitelný postup, který stačí k reprodukci experimentů a k pochopení vzniklých výstupů.
+Pro běžnou práci jsem si v repozitáři připravil i stručnou uživatelskou dokumentaci v adresáři \code{docs/} (index \code{docs/README.md}). Ta je udržovaná spolu se zdrojovým kódem; v této kapitole proto uvádím minimální, samostatně použitelný postup, který stačí k reprodukci experimentů a k pochopení vzniklých výstupů.
 
 \section{Požadavky na prostředí}
 
@@ -549,7 +549,7 @@ Nejdůležitějším předpokladem je funkční GPU stack, protože DensePose i 
 
 \section{Struktura repozitáře a očekávané cesty}
 
-Repozitář je navržen tak, aby se vše spouštělo z kořene projektu. Cesty k datům a modelům jsou centralizované v souboru \texttt{config.py}. Ve výchozím nastavení se předpokládá následující rozložení:
+ Repozitář je navržen tak, aby se vše spouštělo z kořene projektu. Cesty k datům a modelům jsou centralizované v souboru \code{config.py}. Ve výchozím nastavení se předpokládá následující rozložení:
 
 \begin{code}
 data/
@@ -572,41 +572,45 @@ output/
 
 Z hlediska čitelnosti kódu je důležité rozdělení na dvě vrstvy:
 \begin{itemize}
-    \item \textbf{\texttt{projects/}} obsahuje spustitelné experimenty (skripty).
-    \item \textbf{\texttt{common/}} obsahuje sdílené utility (projekce, loss funkce, pomocné DensePose úpravy apod.).
+    \item \textbf{\code{projects/}} obsahuje spustitelné experimenty (skripty).
+    \item \textbf{\code{common/}} obsahuje sdílené utility (projekce, loss funkce, pomocné DensePose úpravy apod.).
 \end{itemize}
 
 \section{Instalace}
 
-Projekt je nejjednodušší spouštět ve virtuálním prostředí. Postup níže odpovídá minimální instalaci pro \texttt{projects/euclidean\_fitter.py}.
+Projekt je nejjednodušší spouštět ve virtuálním prostředí. Postup níže odpovídá minimální instalaci pro \code{projects/euclidean_fitter.py}.
 
 \subsection{Lokální instalace}
 
 \begin{enumerate}
-    \item \textbf{Vytvoření virtuálního prostředí:}
+\item \textbf{Vytvoření virtuálního prostředí:}
 \begin{code}
 python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install -U pip setuptools wheel
 \end{code}
 
-    \item \textbf{Instalace PyTorch:} je potřeba zvolit build odpovídající CUDA runtime. Následující příklad instaluje PyTorch 2.4.0 pro CUDA 12.1:
+\item \textbf{Instalace PyTorch:} je potřeba zvolit build odpovídající CUDA runtime. Následující příklad instaluje PyTorch 2.4.0 pro CUDA 12.1:
 \begin{code}
 pip install torch==2.4.0+cu121 torchvision==0.19.0+cu121 \
-  --index-url https://download.pytorch.org/whl/cu121
+--index-url https://download.pytorch.org/whl/cu121
 \end{code}
-    Pokud si nejsem jistý správnou kombinací, řídím se oficiálním instalátorem: \url{https://pytorch.org/get-started/locally/}.
 
-    \item \textbf{Instalace ostatních Python balíčků:}
+Pokud si nejsem jistý správnou kombinací, řídím se oficiálním instalátorem: \url{https://pytorch.org/get-started/locally/}.
+
+\item \textbf{Instalace ostatních Python balíčků:}
+
 \begin{code}
 pip install -r requirements.txt
 \end{code}
-    Soubor \texttt{requirements.txt} záměrně neinstaluje Detectron2 ani DensePose.
+Soubor \code{requirements.txt} záměrně neinstaluje Detectron2 ani DensePose.
 
-    \item \textbf{Instalace Detectron2 a DensePose ze zdrojů:} repozitář očekává Detectron2 v \path{external/detectron2/}.
+\item \textbf{Instalace Detectron2 a DensePose ze zdrojů:} repozitář očekává Detectron2 v \path{external/detectron2/}.
+
 \begin{code}
 mkdir -p external
-git clone https://github.com/facebookresearch/detectron2.git external/detectron2
+cd external
+git clone https://github.com/facebookresearch/detectron2.git
 
 pip install --no-build-isolation -e external/detectron2
 pip install --no-build-isolation -e external/detectron2/projects/DensePose
@@ -615,46 +619,49 @@ pip install --no-build-isolation -e external/detectron2/projects/DensePose
 
 \subsection{Instalace na clusteru FEL ČVUT (stručně)}
 
-Na clusteru je praktické využít modulový systém (PyTorch, OpenCV apod.) a do vlastního \texttt{.venv} doinstalovat zbytek. V repozitáři je k tomu připravený návod v \texttt{docs/setup-ctu.md}; pro běh je typické i explicitně vybrat GPU přes proměnnou prostředí \texttt{CUDA\_VISIBLE\_DEVICES}.
+Na clusteru je praktické využít modulový systém (PyTorch, OpenCV apod.) a do vlastního \code{.venv} doinstalovat zbytek. V repozitáři je k tomu připravený návod v \code{docs/setup-ctu.md}; pro běh je typické i explicitně vybrat GPU přes proměnnou prostředí \code{CUDA_VISIBLE_DEVICES}.
 
 \section{Stažení dat a modelových souborů}
 
-Z důvodu licencí repozitář neobsahuje datasety ani váhy modelů. Je potřeba je stáhnout a uložit do cest očekávaných v \texttt{config.py}. Kompletní, krokový seznam je v \texttt{docs/data.md}; zde uvádím klíčové položky:
+Z důvodu licencí repozitář neobsahuje datasety ani váhy modelů. Je potřeba je stáhnout a uložit do cest očekávaných v \code{config.py}. Kompletní, krokový seznam je v \code{docs/data.md}; zde uvádím klíčové položky:
 
 \begin{itemize}
-    \item \textbf{COCO 2014 val} (obrázky): adresář \texttt{data/val2014/}.
-    \item \textbf{DensePose CSE anotace (minival):} soubor \texttt{data/densepose\_minival2014\_cse.json}.
-    \item \textbf{DensePose váhy:} \texttt{models/densepose/model\_final\_1d3314.pkl}.
-    \item \textbf{SMPL model:} \texttt{models/smpl/models/basicmodel\_neutral\_lbs\_10\_207\_0\_v1.1.0.pkl} (stahuje se ručně po registraci na \url{https://smpl.is.tue.mpg.de/}).
+    \item \textbf{COCO 2014 val} (obrázky): adresář \code{data/val2014/}.
+     \item \textbf{DensePose CSE anotace (minival):} soubor \code{data/densepose_minival2014_cse.json}.
+     \item \textbf{DensePose váhy:} \code{models/densepose/model_final_1d3314.pkl}.
+     \item \textbf{SMPL model:} \code{models/smpl/models/basicmodel_neutral_lbs_10_207_0_v1.1.0.pkl} (stahuje se ručně po registraci na \url{https://smpl.is.tue.mpg.de/}).
 \end{itemize}
 
-\section{Konfigurace (\texttt{config.py})}
+\section{Konfigurace (\code{config.py})}
 
-Soubor \texttt{config.py} je záměrně jednoduchý: definuje kořen repozitáře a konkrétní cesty k datům, externím závislostem a modelovým souborům. V praxi jsou pro běh projektů klíčové zejména proměnné \texttt{SMPL\_MODEL}, \texttt{DENSEPOSE\_CONFIG} a \texttt{DENSEPOSE\_WEIGHTS}.
+Soubor \code{config.py} je záměrně jednoduchý: definuje kořen repozitáře a konkrétní cesty k datům, externím závislostem a modelovým souborům. V praxi jsou pro běh projektů klíčové zejména proměnné \code{SMPL_MODEL}, \code{DENSEPOSE_CONFIG} a \code{DENSEPOSE_WEIGHTS}.
 
 Rychlá kontrola, že se načítají správné cesty:
 
 \begin{code}
-python -c "from config import *; print(SMPL_MODEL); print(DENSEPOSE_CONFIG); print(DENSEPOSE_WEIGHTS)"
+python
+from config import *; print(SMPL_MODEL)
+print(DENSEPOSE_CONFIG)
+print(DENSEPOSE_WEIGHTS)
 \end{code}
 
-Pokud ukládám data mimo repozitář (typicky na clusteru), mohu buď použít symbolické odkazy na výchozí cesty, nebo \texttt{config.py} upravit.
+Pokud ukládám data mimo repozitář (typicky na clusteru), mohu buď použít symbolické odkazy na výchozí cesty, nebo \code{config.py} upravit.
 
 \section{Spuštění experimentů}
 
-Je důležité spouštět skripty \textbf{z kořene repozitáře} a \textbf{jako modul}. Tím se vyhnu chybám s importy (např. \texttt{from config import *}):
+Je důležité spouštět skripty \textbf{z kořene repozitáře} a \textbf{jako modul}. Tím se vyhnu chybám s importy (např. \code{from config import *}):
 
 \begin{code}
 python -m projects.euclidean_fitter
 \end{code}
 
-Každý skript má jednoduché CLI přes \texttt{argparse}. Parametry si ověřím pomocí:
+Každý skript má jednoduché CLI přes \code{argparse}. Parametry si ověřím pomocí:
 
 \begin{code}
 python -m projects.euclidean_fitter --help
 \end{code}
 
-\subsection{\texttt{projects/euclidean\_fitter.py} (hlavní spustitelný experiment)}
+\subsection{\code{projects/euclidean_fitter.py} (hlavní spustitelný experiment)}
 
 Tento skript odpovídá metodě „Euklidovský fitter“ popsané v explorativní části. V jednom běhu:
 (1) spustí DensePose v2 (CSE), (2) převede embeddingy na indexy vrcholů SMPL a (3) optimalizuje SMPL parametry minimalizací euklidovské chyby v obrazové rovině.
@@ -671,9 +678,9 @@ Pro „plnohodnotný“ běh (více iterací):
 python -m projects.euclidean_fitter -n 1 -i 300
 \end{code}
 
-Poznámka k implementaci: skript aktuálně zpracuje pouze první detekovanou osobu v obrázku (ve smyčce přes osoby je \texttt{break}), což je záměrné zjednodušení pro rychlé ladění.
+Poznámka k implementaci: skript aktuálně zpracuje pouze první detekovanou osobu v obrázku (ve smyčce přes osoby je \code{break}), což je záměrné zjednodušení pro rychlé ladění.
 
-\subsection{\texttt{projects/precission\_fitter.py} (analytický prototyp)}
+\subsection{\code{projects/precission_fitter.py} (analytický prototyp)}
 
 Skript „Precizní fitter“ je v aktuální verzi prototyp pro měření stability DensePose korespondencí (rozptyl pixelů mapovaných na stejný SMPL vrchol). Neprovádí vlastní fitting SMPL; slouží k diagnostice a k návrhu vážené loss funkce popsané v explorativní části.
 
@@ -685,12 +692,12 @@ python -m projects.precission_fitter -n 10
 
 \section{Výstupy}
 
-Výsledky všech skriptů se ukládají do adresáře \texttt{output/}. Každý běh si vytvoří nový podadresář s automaticky zvolenou příponou (např. \texttt{output/euclidean\_fitter\_0/}), aby se nepřepisovaly předchozí experimenty.
+Výsledky všech skriptů se ukládají do adresáře \code{output/}. Každý běh si vytvoří nový podadresář s automaticky zvolenou příponou (např. \code{output/euclidean_fitter_0/}), aby se nepřepisovaly předchozí experimenty.
 
-Pro \texttt{projects/euclidean\_fitter.py} vznikají zejména:
+Pro \code{projects/euclidean_fitter.py} vznikají zejména:
 \begin{itemize}
-    \item přehledové obrázky \texttt{<image\_id>\_<person\_index>\_overview.png} (vývoj ztráty a vizuální diagnostika),
-    \item agregované grafy \texttt{loss\_histogram.png} a \texttt{loss\_remaining\_histogram.png}.
+     \item přehledové obrázky \code{<image_id>_<person_index>_overview.png} (vývoj ztráty a vizuální diagnostika),
+    \item agregované grafy \code{loss_histogram.png} a \code{loss_remaining_histogram.png}.
 \end{itemize}
 
 \section{Řešení častých problémů}
@@ -698,23 +705,23 @@ Pro \texttt{projects/euclidean\_fitter.py} vznikají zejména:
 Většina chyb souvisí s citlivým stackem CUDA + PyTorch + Detectron2, případně s chybějícími soubory. Praktické minimum:
 
 \begin{itemize}
-    \item \textbf{Chyba „No module named densepose“:} je nainstalovaný Detectron2, ale ne DensePose projekt. Pomůže doinstalovat \path{external/detectron2/projects/DensePose} (viz instalační kroky).
-    \item \textbf{Detectron2 nejde sestavit:} typicky nesedí kombinace PyTorch a CUDA, případně chybí toolchain (gcc/g++, nvcc, ninja). V takovém případě je nejlepší ověřit verze (\texttt{torch.version.cuda}, \texttt{nvcc --version}, \texttt{nvidia-smi}) a sestavit Detectron2 znovu v aktivním \texttt{.venv}.
-    \item \textbf{Chybí DensePose config nebo váhy:} zkontroluji \texttt{config.py} a existenci souborů na disku; typicky jde o proměnné:\\
+    \item \textbf{Chyba \enquote{No module named densepose}:} je nainstalovaný Detectron2, ale ne DensePose projekt. Pomůže doinstalovat \code{external/detectron2/projects/DensePose} (viz instalační kroky).
+    \item \textbf{Detectron2 nejde sestavit:} typicky nesedí kombinace PyTorch a CUDA, případně chybí toolchain (gcc/g++, nvcc, ninja). V takovém případě je nejlepší ověřit verze (\code{torch.version.cuda}, \code{nvcc --version}, \code{nvidia-smi}) a sestavit Detectron2 znovu v aktivním \code{.venv}.
+    \item \textbf{Chybí DensePose config nebo váhy:} zkontroluji \code{config.py} a existenci souborů na disku; typicky jde o proměnné:\\
     \path{DENSEPOSE_CONFIG} a \path{DENSEPOSE_WEIGHTS}.
-    \item \textbf{Chybí SMPL model:} SMPL je nutné stáhnout ručně (licence) a případně upravit název souboru v \texttt{config.py}.
-    \item \textbf{Import chyby při spuštění:} skripty spouštím z kořene repozitáře a jako modul (\texttt{python -m projects...}), ne přímo jako \texttt{python projects/...}.
+    \item \textbf{Chybí SMPL model:} SMPL je nutné stáhnout ručně (licence) a případně upravit název souboru v \code{config.py}.
+    \item \textbf{Import chyby při spuštění:} skripty spouštím z kořene repozitáře a jako modul (\code{python -m projects...}), ne přímo jako \code{python projects/...}.
 \end{itemize}
 
-Podrobnější seznam a konkrétní řešení uvádím v \texttt{docs/troubleshooting.md}.
+Podrobnější seznam a konkrétní řešení uvádím v \code{docs/troubleshooting.md}.
 
 \section{Poznámky k reprodukovatelnosti a licencím}
 
 Tento repozitář není benchmarkovací nástroj a cílem je spíše rychlé iterování experimentů. Pokud chci reprodukovat konkrétní obrázky a čísla z této práce, je důležité:
 \begin{itemize}
-    \item použít stejné datasety a váhy popsané v \texttt{docs/data.md},
+    \item použít stejné datasety a váhy popsané v \code{docs/data.md},
     \item zaznamenat verze prostředí (PyTorch, CUDA, commit Detectron2),
-    \item držet konzistentní cesty v \texttt{config.py}.
+    \item držet konzistentní cesty v \code{config.py}.
 \end{itemize}
 
 Zároveň platí, že COCO, DensePose a SMPL mají vlastní licence a nejsou v repozitáři redistribuovány; při sdílení výsledků je potřeba tyto podmínky respektovat.

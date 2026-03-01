@@ -16,10 +16,7 @@
 \usepackage{lmodern}
 \usepackage[T1]{fontenc}
 \usepackage{textcomp}
-\usepackage{float}
-\usepackage{mathrsfs}
 \usepackage{csquotes}
-\usepackage{url}
 \usepackage{seqsplit}
 
 % Set fonts
@@ -39,6 +36,10 @@
 \usepackage{icomma}         % inteligetní čárka v matematickém módu
 \usepackage{dcolumn}        % lepší zarovnání sloupců v tabulkách
 \usepackage{booktabs}       % lepší vodorovné linky v tabulkách
+\usepackage{xurl}
+\usepackage{mathrsfs}
+\usepackage{float}
+
 \makeatletter
 \@ifpackageloaded{xcolor}{
    \@ifpackagewith{xcolor}{usenames}{}{\PassOptionsToPackage{usenames}{xcolor}}
@@ -127,3 +128,5 @@
 %%% programů. (Vyžaduje balíček fancyvrb -- fancy verbatim.)
 
 \DefineVerbatimEnvironment{code}{Verbatim}{fontsize=\small, frame=single}
+
+\newcommand{\code}[1]{\texttt{\nolinkurl{#1}}}
