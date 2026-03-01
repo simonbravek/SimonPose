@@ -1,3 +1,5 @@
+Internal notes (not user-facing)
+
 ROZMYSLET TRANSLACE 2D -> 3D
 
 chumpy solution
