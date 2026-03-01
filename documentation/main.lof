@@ -2,15 +2,15 @@
 \addvspace {10\p@ }
 \contentsline {figure}{\numberline {1.1}{\ignorespaces SMPL -- stage 1}}{9}{figure.caption.10}%
 \contentsline {figure}{\numberline {1.2}{\ignorespaces SMPL -- stage 2}}{9}{figure.caption.11}%
-\contentsline {figure}{\numberline {1.3}{\ignorespaces SMPL -- stage 3}}{10}{figure.caption.12}%
-\contentsline {figure}{\numberline {1.4}{\ignorespaces DensePose -- DenseAnnoFigue, Zobrazuje korespondenci 2D pixelu s vybraným bodem na kanonické 3D síti lidského těla.}}{11}{figure.caption.13}%
+\contentsline {figure}{\numberline {1.3}{\ignorespaces SMPL -- stage 3}}{9}{figure.caption.12}%
+\contentsline {figure}{\numberline {1.4}{\ignorespaces DensePose -- DenseAnnoFigue, Zobrazuje korespondenci 2D pixelu s vybraným bodem na kanonické 3D síti lidského těla.}}{10}{figure.caption.13}%
 \contentsline {figure}{\numberline {1.5}{\ignorespaces DensePose -- Showcase, Použili jsme barevnou mapu (colormap) Jet pro ilustraci. Obě nohy bledě modrou a tedy detekovány jako pravé. Útržek tmavě modré a tedy jiné končetiny je vidět vlevo a odporuje spojitosti těla. Vpravo na obrázku je zase vidět problém s "lupínky".}}{13}{figure.caption.14}%
 \addvspace {10\p@ }
 \contentsline {figure}{\numberline {2.1}{\ignorespaces Příklad inicializace}}{17}{figure.caption.15}%
 \contentsline {figure}{\numberline {2.2}{\ignorespaces Závislost ztráty na iteraci pro daný případ.}}{18}{figure.caption.16}%
-\contentsline {figure}{\numberline {2.3}{\ignorespaces Densepose output vlevo a výstup metody po předposlední 399. iteraci vpravo.}}{19}{figure.caption.17}%
-\contentsline {figure}{\numberline {2.4}{\ignorespaces Inicializace vlevo a výstup metody po 50. iteraci vpravo}}{20}{figure.caption.18}%
-\contentsline {figure}{\numberline {2.5}{\ignorespaces Počet obrázků podle zbývající chyby z původního heuristického odhadu v procentech.}}{21}{figure.caption.19}%
-\contentsline {figure}{\numberline {2.6}{\ignorespaces Příklad vylepšení lidských proporcí}}{22}{figure.caption.20}%
+\contentsline {figure}{\numberline {2.3}{\ignorespaces Výstup DensePose (vlevo) a výstup metody po předposlední (399.) iteraci (vpravo).}}{21}{figure.caption.17}%
+\contentsline {figure}{\numberline {2.4}{\ignorespaces Inicializace (vlevo) a výstup metody po 50. iteraci (vpravo).}}{21}{figure.caption.18}%
+\contentsline {figure}{\numberline {2.5}{\ignorespaces Počet obrázků podle zbývající chyby z původního heuristického odhadu v procentech.}}{22}{figure.caption.19}%
+\contentsline {figure}{\numberline {2.6}{\ignorespaces Příklad vylepšení lidských proporcí}}{23}{figure.caption.20}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {3.1}{\ignorespaces Hlavní struktura repozitáře}}{23}{figure.caption.21}%
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Hlavní struktura repozitáře}}{25}{figure.caption.21}%
