@@ -531,16 +531,203 @@ Jako přirozené pokračování bych nejprve ověřil samotnou hypotézu kvantit
 
 \chapter{Technická dokumentace}
 
-Poslední kapitola obsahuje informace o tom, jak projekt, který v rámci maturitní práce vznikl, nainstalovat, spustit a používat.
+Tato kapitola slouží jako praktický návod k instalaci a spuštění repozitáře \textbf{SimonPose}, který vznikl jako doprovod k této maturitní práci. Projekt je výzkumný prototyp: není zamýšlen jako obecná knihovna a jeho primárním rozhraním jsou spustitelné skripty v adresáři \texttt{projects/}.
 
+Pro běžnou práci jsem si v repozitáři připravil i stručnou uživatelskou dokumentaci v adresáři \texttt{docs/} (index \texttt{docs/README.md}). Ta je udržovaná spolu se zdrojovým kódem; v této kapitole proto uvádím minimální, samostatně použitelný postup, který stačí k reprodukci experimentů a k pochopení vzniklých výstupů.
 
+\section{Požadavky na prostředí}
 
+Nejdůležitějším předpokladem je funkční GPU stack, protože DensePose i následný fitting SMPL jsou výpočetně náročné. Projekt je otestován primárně na Linuxu s NVIDIA GPU.
+
+\begin{itemize}
+    \item \textbf{Python:} 3.11.
+    \item \textbf{Operační systém:} Linux doporučen; Windows přes WSL může fungovat; na macOS je běh typicky pouze na CPU a je výrazně pomalý.
+    \item \textbf{GPU:} NVIDIA GPU s CUDA (silně doporučené).
+    \item \textbf{Disk:} řádově desítky GB (COCO val2014 + modely).
+    \item \textbf{Build nástroje:} pro instalaci Detectron2 ze zdrojů je potřeba C++ toolchain a (při CUDA buildu) i CUDA toolkit.
+\end{itemize}
+
+\section{Struktura repozitáře a očekávané cesty}
+
+Repozitář je navržen tak, aby se vše spouštělo z kořene projektu. Cesty k datům a modelům jsou centralizované v souboru \texttt{config.py}. Ve výchozím nastavení se předpokládá následující rozložení:
+
+\begin{code}
+data/
+  val2014/
+    COCO_val2014_*.jpg
+  densepose_minival2014_cse.json
+
+models/
+  densepose/
+    model_final_1d3314.pkl
+  smpl/
+    models/
+      basicmodel_neutral_lbs_10_207_0_v1.1.0.pkl
+
+external/
+  detectron2/
+
+output/
+\end{code}
+
+Z hlediska čitelnosti kódu je důležité rozdělení na dvě vrstvy:
+\begin{itemize}
+    \item \textbf{\texttt{projects/}} obsahuje spustitelné experimenty (skripty).
+    \item \textbf{\texttt{common/}} obsahuje sdílené utility (projekce, loss funkce, pomocné DensePose úpravy apod.).
+\end{itemize}
+
+\section{Instalace}
+
+Projekt je nejjednodušší spouštět ve virtuálním prostředí. Postup níže odpovídá minimální instalaci pro \texttt{projects/euclidean\_fitter.py}.
+
+\subsection{Lokální instalace}
+
+\begin{enumerate}
+    \item \textbf{Vytvoření virtuálního prostředí:}
+\begin{code}
+python3.11 -m venv .venv
+source .venv/bin/activate
+python -m pip install -U pip setuptools wheel
+\end{code}
+
+    \item \textbf{Instalace PyTorch:} je potřeba zvolit build odpovídající CUDA runtime. Následující příklad instaluje PyTorch 2.4.0 pro CUDA 12.1:
+\begin{code}
+pip install torch==2.4.0+cu121 torchvision==0.19.0+cu121 \
+  --index-url https://download.pytorch.org/whl/cu121
+\end{code}
+    Pokud si nejsem jistý správnou kombinací, řídím se oficiálním instalátorem: \url{https://pytorch.org/get-started/locally/}.
+
+    \item \textbf{Instalace ostatních Python balíčků:}
+\begin{code}
+pip install -r requirements.txt
+\end{code}
+    Soubor \texttt{requirements.txt} záměrně neinstaluje Detectron2 ani DensePose.
+
+    \item \textbf{Instalace Detectron2 a DensePose ze zdrojů:} repozitář očekává Detectron2 v \path{external/detectron2/}.
+\begin{code}
+mkdir -p external
+git clone https://github.com/facebookresearch/detectron2.git external/detectron2
+
+pip install --no-build-isolation -e external/detectron2
+pip install --no-build-isolation -e external/detectron2/projects/DensePose
+\end{code}
+\end{enumerate}
+
+\subsection{Instalace na clusteru FEL ČVUT (stručně)}
+
+Na clusteru je praktické využít modulový systém (PyTorch, OpenCV apod.) a do vlastního \texttt{.venv} doinstalovat zbytek. V repozitáři je k tomu připravený návod v \texttt{docs/setup-ctu.md}; pro běh je typické i explicitně vybrat GPU přes proměnnou prostředí \texttt{CUDA\_VISIBLE\_DEVICES}.
+
+\section{Stažení dat a modelových souborů}
+
+Z důvodu licencí repozitář neobsahuje datasety ani váhy modelů. Je potřeba je stáhnout a uložit do cest očekávaných v \texttt{config.py}. Kompletní, krokový seznam je v \texttt{docs/data.md}; zde uvádím klíčové položky:
+
+\begin{itemize}
+    \item \textbf{COCO 2014 val} (obrázky): adresář \texttt{data/val2014/}.
+    \item \textbf{DensePose CSE anotace (minival):} soubor \texttt{data/densepose\_minival2014\_cse.json}.
+    \item \textbf{DensePose váhy:} \texttt{models/densepose/model\_final\_1d3314.pkl}.
+    \item \textbf{SMPL model:} \texttt{models/smpl/models/basicmodel\_neutral\_lbs\_10\_207\_0\_v1.1.0.pkl} (stahuje se ručně po registraci na \url{https://smpl.is.tue.mpg.de/}).
+\end{itemize}
+
+\section{Konfigurace (\texttt{config.py})}
+
+Soubor \texttt{config.py} je záměrně jednoduchý: definuje kořen repozitáře a konkrétní cesty k datům, externím závislostem a modelovým souborům. V praxi jsou pro běh projektů klíčové zejména proměnné \texttt{SMPL\_MODEL}, \texttt{DENSEPOSE\_CONFIG} a \texttt{DENSEPOSE\_WEIGHTS}.
+
+Rychlá kontrola, že se načítají správné cesty:
+
+\begin{code}
+python -c "from config import *; print(SMPL_MODEL); print(DENSEPOSE_CONFIG); print(DENSEPOSE_WEIGHTS)"
+\end{code}
+
+Pokud ukládám data mimo repozitář (typicky na clusteru), mohu buď použít symbolické odkazy na výchozí cesty, nebo \texttt{config.py} upravit.
+
+\section{Spuštění experimentů}
+
+Je důležité spouštět skripty \textbf{z kořene repozitáře} a \textbf{jako modul}. Tím se vyhnu chybám s importy (např. \texttt{from config import *}):
+
+\begin{code}
+python -m projects.euclidean_fitter
+\end{code}
+
+Každý skript má jednoduché CLI přes \texttt{argparse}. Parametry si ověřím pomocí:
+
+\begin{code}
+python -m projects.euclidean_fitter --help
+\end{code}
+
+\subsection{\texttt{projects/euclidean\_fitter.py} (hlavní spustitelný experiment)}
+
+Tento skript odpovídá metodě „Euklidovský fitter“ popsané v explorativní části. V jednom běhu:
+(1) spustí DensePose v2 (CSE), (2) převede embeddingy na indexy vrcholů SMPL a (3) optimalizuje SMPL parametry minimalizací euklidovské chyby v obrazové rovině.
+
+Typické spuštění pro rychlou kontrolu (málo iterací):
+
+\begin{code}
+python -m projects.euclidean_fitter -n 1 -i 10
+\end{code}
+
+Pro „plnohodnotný“ běh (více iterací):
+
+\begin{code}
+python -m projects.euclidean_fitter -n 1 -i 300
+\end{code}
+
+Poznámka k implementaci: skript aktuálně zpracuje pouze první detekovanou osobu v obrázku (ve smyčce přes osoby je \texttt{break}), což je záměrné zjednodušení pro rychlé ladění.
+
+\subsection{\texttt{projects/precission\_fitter.py} (analytický prototyp)}
+
+Skript „Precizní fitter“ je v aktuální verzi prototyp pro měření stability DensePose korespondencí (rozptyl pixelů mapovaných na stejný SMPL vrchol). Neprovádí vlastní fitting SMPL; slouží k diagnostice a k návrhu vážené loss funkce popsané v explorativní části.
+
+Spuštění:
+
+\begin{code}
+python -m projects.precission_fitter -n 10
+\end{code}
+
+\section{Výstupy}
+
+Výsledky všech skriptů se ukládají do adresáře \texttt{output/}. Každý běh si vytvoří nový podadresář s automaticky zvolenou příponou (např. \texttt{output/euclidean\_fitter\_0/}), aby se nepřepisovaly předchozí experimenty.
+
+Pro \texttt{projects/euclidean\_fitter.py} vznikají zejména:
+\begin{itemize}
+    \item přehledové obrázky \texttt{<image\_id>\_<person\_index>\_overview.png} (vývoj ztráty a vizuální diagnostika),
+    \item agregované grafy \texttt{loss\_histogram.png} a \texttt{loss\_remaining\_histogram.png}.
+\end{itemize}
+
+\section{Řešení častých problémů}
+
+Většina chyb souvisí s citlivým stackem CUDA + PyTorch + Detectron2, případně s chybějícími soubory. Praktické minimum:
+
+\begin{itemize}
+    \item \textbf{Chyba „No module named densepose“:} je nainstalovaný Detectron2, ale ne DensePose projekt. Pomůže doinstalovat \path{external/detectron2/projects/DensePose} (viz instalační kroky).
+    \item \textbf{Detectron2 nejde sestavit:} typicky nesedí kombinace PyTorch a CUDA, případně chybí toolchain (gcc/g++, nvcc, ninja). V takovém případě je nejlepší ověřit verze (\texttt{torch.version.cuda}, \texttt{nvcc --version}, \texttt{nvidia-smi}) a sestavit Detectron2 znovu v aktivním \texttt{.venv}.
+    \item \textbf{Chybí DensePose config nebo váhy:} zkontroluji \texttt{config.py} a existenci souborů na disku; typicky jde o proměnné:\\
+    \path{DENSEPOSE_CONFIG} a \path{DENSEPOSE_WEIGHTS}.
+    \item \textbf{Chybí SMPL model:} SMPL je nutné stáhnout ručně (licence) a případně upravit název souboru v \texttt{config.py}.
+    \item \textbf{Import chyby při spuštění:} skripty spouštím z kořene repozitáře a jako modul (\texttt{python -m projects...}), ne přímo jako \texttt{python projects/...}.
+\end{itemize}
+
+Podrobnější seznam a konkrétní řešení uvádím v \texttt{docs/troubleshooting.md}.
+
+\section{Poznámky k reprodukovatelnosti a licencím}
+
+Tento repozitář není benchmarkovací nástroj a cílem je spíše rychlé iterování experimentů. Pokud chci reprodukovat konkrétní obrázky a čísla z této práce, je důležité:
+\begin{itemize}
+    \item použít stejné datasety a váhy popsané v \texttt{docs/data.md},
+    \item zaznamenat verze prostředí (PyTorch, CUDA, commit Detectron2),
+    \item držet konzistentní cesty v \texttt{config.py}.
+\end{itemize}
+
+Zároveň platí, že COCO, DensePose a SMPL mají vlastní licence a nejsou v repozitáři redistribuovány; při sdílení výsledků je potřeba tyto podmínky respektovat.
 
 \chapter*{Závěr}
 \pagestyle{empty}
 \addcontentsline{toc}{chapter}{Závěr}
 
 Závěr obsahuje shrnutí práce a vyjadřuje se k míře splnění jejího zadání. Dále by se zde mělo objevit sebehodnocení studenta a informace o tom, co nového se naučil a jak vnímal svou práci na projektu.
+
+Ačkoli se mi nepovedlo dokončit své bádání, byl jsem schopný přijít na zajímavé metody a třeba v tom budu pokračovat v budoucnu. 
+
+
 
 %%% Seznam použité literatury
 \printbibliography[title={Seznam použité literatury},heading={bibintoc}]

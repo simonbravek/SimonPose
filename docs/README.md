@@ -11,4 +11,4 @@ Start here:
 - Common failures and fixes: [docs/troubleshooting.md](troubleshooting.md)
 - Configuration and paths: [docs/configuration.md](configuration.md)
 
-Research background and method discussion lives in [`documentation/main.pdf`](../documentation/main.pdf).
+Research background and method discussion lives in [`documentation/simon-bravek-mp-2026.pdf`](../documentation/simon-bravek-mp-2026.pdf).

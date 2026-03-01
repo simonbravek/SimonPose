@@ -5,7 +5,9 @@ SimonPose is a research prototype exploring how to improve monocular human pose 
 
 DensePose provides dense 2D-to-body correspondences (per-pixel embeddings). SimonPose uses those correspondences to optimize SMPL parameters and produce a globally consistent 3D human mesh.
 
-This repository accompanies the write-up in [`documentation/main.pdf`](documentation/main.pdf).
+This repository accompanies the write-up for maturita exam in [`documentation/simon-bravek-mp-2026.pdf`](documentation/simon-bravek-mp-2026.pdf).
+
+The rest of 
 
 ## Requirements (minimal)
 
@@ -108,6 +110,6 @@ If you use this code in academic work, please cite the accompanying report:
   author       = {Šimon Brávek},
   year         = {2026},
   institution  = {FEL CTU (fel.cvut.cz)and Johannes Kepler Grammar School (gjk.cz)},
-  howpublished = {Code and report in this repository (documentation/main.pdf)}
+  howpublished = {Code and report in this repository (documentation/simon-bravek-mp-2026.pdf)}
 }
 ```

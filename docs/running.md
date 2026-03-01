@@ -31,7 +31,7 @@ Some constants are overridden by CLI flags (for example, `ITERATIONS` is overrid
 
 ## `projects.euclidean_fitter`
 
-Status: usable end-to-end (the "working" fitter described in `documentation/main.pdf`).
+Status: usable end-to-end (the "working" fitter described in `documentation/simon-bravek-mp-2026.pdf`).
 
 What it does:
 
