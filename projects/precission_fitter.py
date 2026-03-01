@@ -186,7 +186,9 @@ for image_id in tqdm(sorted(cocoGt.getImgIds())[:NUMBER_OF_IMAGES]):
         ax.view_init(azim=-90, elev=90)
         plt.colorbar(sm, cax=fig.add_subplot(gs[3]))
 
-        plt.savefig(OUTPUT_DIR / f"test_{ann['id']}")
+        plt.savefig(OUTPUT_DIR / f"test_{ann['id']}.png")
+        plt.close()
+
 
         # breakpoint()
 

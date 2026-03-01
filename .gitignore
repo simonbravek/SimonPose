@@ -5,6 +5,25 @@ __pycache__/
 .env*
 *.log
 
+# LaTeX generated files
+*.aux
+*.bbl
+*.blg
+*.bcf
+*.fdb_latexmk
+*.fls
+*.lof
+*.lot
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+*.pdfaxmpi
+*.log
+
+# Error/Editor backup files
+*-SAVE-ERROR
+
 # Leave out
 data/*
 output/
