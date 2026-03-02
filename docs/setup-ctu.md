@@ -2,6 +2,8 @@
 
 This is a practical setup guide for the CTU/FEL cluster environment described in the original README.
 
+More information about the CTU cluster can be found on the [Visual Vecognition Group docs](https://klarajanouskova.github.io/VRG/).
+
 The core idea:
 
 - Let the cluster modules provide heavyweight GPU packages (PyTorch, OpenCV, etc.).

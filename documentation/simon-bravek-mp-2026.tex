@@ -34,11 +34,16 @@ Děkuji Jiřímu Matasovi za skvělou příležitost strávit měsíc v létě n
 
 % Abstrakt česky
 \def\Abstrakt{%
-Jde o explorativní analýzu s cílem přinést metody pro zlepšení human pose estimation.
+Tato maturitní práce se zabývá odhadem lidské pózy (human pose estimation) v reálných scénách (in-the-wild) a možnostmi, jak zpřesnit monokulární 3D rekonstrukci člověka z běžného 2D snímku. Vychází z toho, že současné modely dosahují výborných výsledků na laboratorních datasetech, ale v praxi je limitují zákryty, perspektivní zkreslení, vizuální šum a propletení více těl. Práce proto kombinuje DensePose, který poskytuje hustou korespondenci pixelů na povrch těla, s parametrickým 3D modelem SMPL, jenž vynucuje globálně konzistentní a anatomicky realistickou geometrii lidského těla.
+
+Zvolená metodika je explorativní a řídí se principem Fail-Fast: rychle formulovat hypotézu, ověřit ji prototypem a analyzovat i neúspěšné výsledky. Jsou navrženy tři varianty fittingu (pasování) modelu SMPL do signálu z DensePose: \enquote{Embedding fitter} s explicitním ošetřením viditelnosti, stabilnější \enquote{Euklidovský fitter} měřící chybu v obrazové rovině a prototyp \enquote{Precizní fitter}, který odhaduje důvěryhodnost korespondencí podle jejich prostorové konzistence. Experimenty na COCO DensePose (minival) ukazují, že embeddingový přístup je výpočetně náročný a nestabilní. Naopak euklidovská formulace umožňuje rychle iterovat experimenty a přibližně u třetiny zkoušených snímků dosahuje 2D překryvu srovnatelného s původní detekcí; výsledkem je navíc explicitní 3D model těla. Součástí výstupu práce je také otevřený repozitář SimonPose s implementacemi prototypů a technickou dokumentací, který může sloužit jako základ pro další zvyšování robustnosti fittingu a navazující výzkum v oblasti počítačového vidění.
 }
 
 % Abstrakt anglicky
 \def\AbstraktEN{%
+This thesis addresses human pose estimation in real-world (in-the-wild) imagery and investigates ways to improve monocular 3D human reconstruction from a single 2D image. While state-of-the-art models perform well on controlled benchmarks, their accuracy degrades under occlusions, perspective distortion, visual noise, and crowded scenes. To mitigate these issues, this work combines DensePose, which provides dense pixel-to-surface correspondences, with the parametric 3D body model SMPL, which enforces globally consistent and anatomically plausible human geometry.
+
+The methodology is exploratory and follows a Fail-Fast approach: quickly formulate a hypothesis, validate it with a prototype, and analyze failures as well as successes. Three SMPL fitting variants are proposed for leveraging the DensePose signal: an \enquote{Embedding fitter} with explicit visibility handling, a more stable \enquote{Euclidean fitter} that measures error in the image plane, and a \enquote{Precision fitter} prototype that estimates correspondence reliability from spatial consistency. Experiments on COCO DensePose (minival) show that the embedding-based approach is computationally expensive and unstable. In contrast, the Euclidean formulation enables rapid iteration and achieves 2D overlap comparable to the original detection on roughly one third of the evaluated images, while additionally producing an explicit 3D body model. The thesis also delivers the open-source SimonPose repository, including prototype implementations and technical documentation, providing a foundation for improving fitting robustness and for follow-up research in computer vision.
 }
 
 % 3 až 5 klíčových slov
@@ -123,7 +128,16 @@ Dále zvolíme metodu pro výpočet chyby výstupu (loss). Proces generování v
 
 \subsection{Druhy detekcí}
 
-K tomuto účelu se využívá hned několik metod. Tou úplně nejzákladnější jsou rámečky k ohraničení detekovaných lidí. skládají se ze dvou souřadnic.
+Když v počítačovém vidění mluvím o \enquote{detekci}, nemusí tím být myšlen pouze rámeček kolem objektu. Model může výstupem popsat jak samotnou polohu objektu, tak i jeho tvar, strukturu nebo konkrétní body. Pro úlohy, které souvisí s člověkem (a se kterými se v této práci setkávám), jsou nejčastější zejména tyto typy detekce:
+
+\begin{itemize}
+    \item \textbf{Bounding box:} nejmenší obdélník, který postavu ohraničí. Je výpočetně levný a často slouží jako první krok, který zúží oblast zájmu pro další analýzu.
+    \item \textbf{Instance segmentace (maska):} pixelová reprezentace siluety člověka pro každou osobu zvlášť. Oproti rámečku zachycuje přesnější tvar a lépe funguje v přítomnosti zákrytů.
+    \item \textbf{2D klíčové body (keypoints):} sada anatomických bodů (např. ramena, lokty, kolena), které tvoří \enquote{kostru} pózy. Jde o řídkou reprezentaci, která je rychlá a interpretovatelná, ale ztrácí informaci o objemu těla.
+    \item \textbf{Hustá korespondence (DensePose):} přiřazení pixelů na postavě ke kanonickému povrchu těla. Tento výstup poskytuje výrazně bohatší signál než samotné klíčové body a tvoří základ metod, které v této práci zkouším.
+\end{itemize}
+
+V praxi bývá detekce doplněna i skóre důvěry (confidence), podle kterého lze výsledky filtrovat. Volba typu detekce pak přímo určuje, jaké metriky kvality dávají smysl (např. IoU pro masky, nebo průměrnou chybu bodů pro keypoints) a jaké další kroky jsou vůbec možné.
 
 
 \subsection{Odhad 2D a jeho limitace}
@@ -627,9 +641,10 @@ Z důvodu licencí repozitář neobsahuje datasety ani váhy modelů. Je potřeb
 
 \begin{itemize}
     \item \textbf{COCO 2014 val} (obrázky): adresář \code{data/val2014/}.
-     \item \textbf{DensePose CSE anotace (minival):} soubor \code{data/densepose_minival2014_cse.json}.
-     \item \textbf{DensePose váhy:} \code{models/densepose/model_final_1d3314.pkl}.
-     \item \textbf{SMPL model:} \code{models/smpl/models/basicmodel_neutral_lbs_10_207_0_v1.1.0.pkl} (stahuje se ručně po registraci na \url{https://smpl.is.tue.mpg.de/}).
+    \item \textbf{DensePose CSE anotace (minival):} soubor \code{data/densepose_minival2014_cse.json}.
+    \item \textbf{DensePose váhy:} \code{models/densepose/model_final_1d3314.pkl}.
+    \item \textbf{SMPL mapování vrcholů na části těla:} \code{data/smpl_vert_segmentation.json}.
+    \item \textbf{SMPL model:} \code{models/smpl/models/basicmodel_neutral_lbs_10_207_0_v1.1.0.pkl} (stahuje se ručně po registraci na \url{https://smpl.is.tue.mpg.de/}).
 \end{itemize}
 
 \section{Konfigurace (\code{config.py})}
@@ -730,9 +745,29 @@ Zároveň platí, že COCO, DensePose a SMPL mají vlastní licence a nejsou v r
 \pagestyle{empty}
 \addcontentsline{toc}{chapter}{Závěr}
 
-(Závěr obsahuje shrnutí práce a vyjadřuje se k míře splnění jejího zadání. Dále by se zde mělo objevit sebehodnocení studenta a informace o tom, co nového se naučil a jak vnímal svou práci na projektu.)
+Tato maturitní práce se zabývala možnostmi, jak zlepšit odhad lidské pózy v reálných scénách pomocí kombinace DensePose a parametrického modelu SMPL. DensePose poskytuje hustou korespondenci pixelů na povrch těla, ale jeho výstup je zatížen šumem a typickými chybami (např. záměna levé a pravé strany). SMPL naopak přináší silné humanoidní omezení. Zvolil jsem proto explorativní postup postavený na principu Fail-Fast: rychle navrhnout hypotézu, ověřit ji prototypem a z výsledků (včetně neúspěchů) vyvodit další směr.
 
-Ačkoli se mi nepovedlo dokončit své bádání, byl jsem schopný přijít na zajímavé metody a třeba v tom budu pokračovat v budoucnu. 
+\section{Naplnění cílů}
+
+Zadání jsem formuloval realisticky: cílem nebylo vytvořit nový SOTA model, ale metodicky prozkoumat, jak zpřesnit fitting SMPL do signálu z DensePose a jaké překážky se při tom v praxi objevují. Tento cíl se podařilo naplnit ve třech navazujících krocích, které jsou v práci transparentně zdokumentované včetně slepých uliček.
+
+Nejprve jsem navrhl tzv. \enquote{Embedding fitter}, který se snaží minimalizovat rozdíl mezi DensePose embeddingem v obraze a embeddingem odvozeným z vyrenderované SMPL síťoviny. Implementace ukázala dvě klíčová omezení: vysokou výpočetní náročnost výpočtu viditelnosti a nestabilitu gradientní optimalizace způsobenou skokovými změnami viditelných trojúhelníků. Výsledek proto nepovažuji za prakticky použitelný v rámci cíle práce, ale jeho analýza byla důležitá pro další návrh.
+
+Na základě těchto zjištění jsem přešel k jednoduššímu a stabilnějšímu přístupu \enquote{Euklidovský fitter}. DensePose zde slouží k vytvoření 2D korespondencí mezi pixely masky a vrcholy SMPL; ztráta je pak měřena přímo v obrazové rovině euklidovskou vzdáleností. Tento krok výrazně zlepšil možnost rychle iterovat experimenty a zároveň umožnil v řadě případů získat konzistentní 3D rekonstrukci. Při testování na COCO DensePose (minival) se podařilo přibližně u třetiny zkoušených snímků dosáhnout 2D překryvu srovnatelného s původní DensePose detekcí, přičemž výsledkem je navíc explicitní 3D objem, se kterým lze dále pracovat.
+
+Třetím směrem je \enquote{Precizní fitter}, tedy myšlenka pracovat s tím, že ne všechny DensePose korespondence jsou stejně důvěryhodné. V práci jsem implementoval analytický prototyp (\code{projects/precission_fitter.py}), který měří rozptyl pixelů mapovaných na stejný SMPL vrchol a slouží jako podklad pro váženou ztrátovou funkci. Ačkoli se mi tento krok nepodařilo v časovém rozsahu práce plně integrovat do optimalizace, považuji jej za perspektivní, protože přímo míří na hlavní slabinu euklidovského fitteru: chyby v korespondencích (např. záměna končetin), které mohou optimalizaci stáhnout do nelidského lokálního minima.
+
+Součástí výstupu práce je také repozitář \textbf{SimonPose} s implementacemi prototypů a s technickou dokumentací pro instalaci a reprodukci experimentů, publikovaný pod licencí Apache 2.0. Přínos práce tak nespočívá jen ve výsledných obrázcích, ale i v konkrétním, otevřeně sdíleném základu, který umožňuje na metody navázat a systematicky je dále zlepšovat.
+
+\section{Osobní posun}
+
+Během práce jsem si osvojil schopnost číst odborné články a rozumět jejich matematickým formulacím, které pro mě na začátku působily odrazujícím dojmem. Prakticky jsem se naučil pracovat s nástroji a knihovnami, které se v současném počítačovém vidění používají (PyTorch, Detectron2/DensePose, SMPL) a řešit typické problémy spojené s GPU prostředím, výkonem a numerickou stabilitou optimalizace. Zároveň jsem si ověřil, že i neúspěšný prototyp může být užitečný výsledek, pokud je dobře analyzovaný a přetavený do jasných závěrů pro další iteraci.
+
+\section{Pokračování}
+
+Nejpřirozenější pokračování vidím ve dvou praktických směrech: (1) zlepšit inicializaci globální transformace a regularizaci parametrů SMPL tak, aby se fitting nezamotal hned v prvních iteracích, a (2) dokončit vážení korespondencí z \enquote{precizního} prototypu a ověřit, zda opravdu zvyšuje robustnost vůči typickým chybám DensePose. Dává také smysl rozšířit experimenty na více osob v jedné scéně a na video, kde lze využít časovou konzistenci jako další zdroj omezení.
+
+Navzdory technické náročnosti mi práce dávala smysl a postupně mě začala bavit i její psaná část. Projekt proto beru jako otevřený základ, ke kterému bych se rád v budoucnu vrátil a navázal na něj v dalším studiu.
 
 
 

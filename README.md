@@ -110,6 +110,6 @@ If you use this code in academic work, please cite the accompanying report:
   author       = {Šimon Brávek},
   year         = {2026},
   institution  = {FEL CTU (fel.cvut.cz) and Johannes Kepler Grammar School (gjk.cz)},
-  howpublished = {Code and report in this repository (documentation/simon-bravek-mp-2026.pdf)}
+  howpublished = {[simon-bravek-mp-2026.pdf](https://github.com/simonbravek/SimonPose/blob/main/documentation/simon-bravek-mp-2026.pdf)}
 }
 ```
