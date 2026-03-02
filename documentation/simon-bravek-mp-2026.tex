@@ -29,7 +29,7 @@ o~změně některých zákonů (autorský zákon) ve znění pozdějších před
 
 % Text poděkování
 \def\Podekovani{%
-Děkuji Jiřímu Matasovi za skvělou příležitost strávit měsíc v létě na katedře strojového učení a být součástí soudobého výzkumu a za jeho skvělé nápady v tomto oboru. Bezpochyby tato zkušenost formovala mé rozhodnutí studovat obor AI ma MFF UK a propůjčila mi vášeň k nejnovějším technologiím. Děkuji také Matěji Suchánkovi jako člověku, co mě provedl tou nejtěžší asimilací s prácí s grafickými kartami a modely jež jsem používal. Děkuji také lidem z katedry, jež ke mě byli přátelští a v neposlední řadě Igoru Vujovičovi za rozvíjení informatiky na našem gymnáziu i přez mnohé překážky. 
+Děkuji Jiřímu Matasovi za příležitost strávit měsíc během léta na katedře strojového učení a být součástí současného výzkumu, stejně jako za jeho podněty a nápady. Tato zkušenost významně ovlivnila mé rozhodnutí studovat umělou inteligenci na MFF UK a prohloubila můj zájem o nejnovější technologie. Děkuji také Matěji Suchánkovi, který mi pomohl zorientovat se v práci s grafickými kartami a modely, jež jsem v projektu používal. Poděkování patří i lidem z katedry, kteří ke mně byli přátelští, a v neposlední řadě Igoru Vujovičovi za podporu rozvoje informatiky na našem gymnáziu i přes mnohé překážky.
 }
 
 % Abstrakt česky
@@ -47,9 +47,9 @@ The methodology is exploratory and follows a Fail-Fast approach: quickly formula
 }
 
 % 3 až 5 klíčových slov
-\def\KlicovaSlova{počítačové vidění, odhad lidské pozice, DensePose, SMPL/SMPL-X, \\rekonstrukce z 2D do 3D, hluboké učení, vylepšení modelu}
+\def\KlicovaSlova{počítačové vidění, odhad lidské pózy, DensePose, SMPL, rekonstrukce z 2D do 3D}
 % 3 až 5 klíčových slov anglicky
-\def\KlicovaSlovaEN{computer-vision, human-pose-estimation, DensePose, SMPL/SMPL-X, \\2D-to-3D reconstruction, deep-learning, model improvement}
+\def\KlicovaSlovaEN{computer vision, human pose estimation, DensePose, SMPL, 2D-to-3D reconstruction}
 
 
 \begin{document}
@@ -107,7 +107,7 @@ Následující zkratky a pojmy používám ve významu uvedeném zde. Uvedené d
 
 V současné informatice a počítačovém vidění (Computer Vision) představuje automatické porozumění lidskému pohybu jednu z největších výzev \cite{purkrabek2025detection}. Nejde již o prostou detekci, zda se v obrázku nachází člověk, či kolik jich je, ale o snahu přenést lidskou biomechaniku do digitálního prostoru. Schopnost přesně interpretovat lidskou pózu z běžného 2D obrazu (např. z mobilního telefonu) otevírá dveře aplikacím, které byly dříve nemyslitelné bez drahých studiových systémů pro snímání pohybu (Motion Capture) \cite{pavlakos2019expressive,wang2024prompthmr}.
 
-Tyto technologie se dnes nachází již v mnoha podobách a můžou tak pomoci v celé řadě aplikací. Dnes již můžeme najít rozpoznání člověka a obličeje v mobilní aplikaci galerie, kde napomáhá chytrému třízení fotek nebo v bezpečnostních systémech pro detekci vetřelce. Detekce konkrétní pozice, tedy kde se nachází jednotlivé klouby, může zase pomoci zastavit automatický vozík před kolizí s člověkem nebo zavolat pomoc pokud uvidí nehybně ležícího chodce. 
+Tyto technologie se dnes vyskytují v mnoha podobách a mohou pomáhat v celé řadě aplikací. Rozpoznávání osob a obličejů se využívá například v galerijních aplikacích pro automatické třídění fotografií nebo v bezpečnostních systémech. Odhad polohy kloubů může přispět například k zastavení automatického vozíku před kolizí s člověkem nebo k přivolání pomoci, pokud systém detekuje nehybně ležícího chodce.
 
 Kromě přesnosti těchto metod se vědci čím dál více zaměřují také na rychlost. Mnohé aplikace totiž potřebují živou analýzu videa a to často i z několika kamer najednou. Tak tomu je u autonomního řízení automobilů, které se ukazuje být velkým tahounem tohoto odvětví.
 
@@ -144,7 +144,7 @@ Na začátku práce uvádím seznam zkratek a pojmů, který sjednocuje použív
 
 \subsection{Co je to model}
 
-V této práci se často věnuji programům, které využívají metody strojového učení k detekci a odhadu pozice člověka v obrázku; takový program zde nazývám modelem. Tento program má mnoho parametrů, na jejichž základě mapuje vstup na výstup. Nejdříve projde procesem, který nazýváme trénování. Během něj se jako vstup použije obrázek a program k němu vygeneruje např. souřadnice, kde odhaduje klouby, na základě počátečního nastavení parametrů (inicializace). Inicializace bývá velmi složitá a často je předmětem samostatných studií \cite{mishkin2016goodinit}; v této práci se jí detailně nevěnuji. Tento výsledek se pak porovná s ukázkovým příkladem pro daný obrázek, tedy s anotací připravenou člověkem.
+V této práci se často věnuji programům, které využívají metody strojového učení k detekci a odhadu pózy člověka v obrázku; takový program zde nazývám modelem. Tento program má mnoho parametrů, na jejichž základě mapuje vstup na výstup. Nejdříve projde procesem, který nazýváme trénování. Během něj se jako vstup použije obrázek a program k němu vygeneruje např. souřadnice, kde odhaduje klouby, na základě počátečního nastavení parametrů (inicializace). Inicializace bývá velmi složitá a často je předmětem samostatných studií \cite{mishkin2016goodinit}; v této práci se jí detailně nevěnuji. Tento výsledek se pak porovná s ukázkovým příkladem pro daný obrázek, tedy s anotací připravenou člověkem.
 
 Dále zvolíme metodu pro výpočet chyby výstupu (loss). Generování výstupu a výpočet chyby opakujeme mnohokrát pro velké množství obrázků a jejich anotací. Skupině těchto dat říkáme trénovací dataset. Je nutné mít velké množství obrázků a anotací ještě před začátkem trénování; ty pocházejí v drtivé většině případů od lidských anotátorů, jsou tak nákladné a zároveň zatížené lidskou chybovostí. Součtem (nebo jinou agregací) pak spočítáme ztrátovou funkci (loss function) jako metriku neshody odhadu modelu vůči anotacím.
 
@@ -199,30 +199,30 @@ Přechod od 2D chápání člověka k pochopení objemové struktury lidského t
 Namodelovat realistické lidské tělo ručně je velmi náročné. Proto vznikl parametrický model SMPL \cite{SMPL:2015}, který na základě parametrů $\beta$ (tvar) a $\theta$ (póza) generuje síťovinu různých postav v různých pózách.
 
 \subsection{Výpočet}
-Celý model těla vzniká tak, že se začne se souřadnicemi bodů kanonického těla $\bar{T}$ v klidu (tedy univerzálního zvolenéhe těla, které zobrazuje průměrného člověka ve všech proporcích). Ke každému bodu se následně přičte posunutí na základě parametru tělesných proporcí $\beta$ příspěvkem $B_s(\beta)$. Tak vznikne T-pose správných tělesných proporcí. Také vypočteme počáteční pozici kloubů $J(\beta)$ na základě tělesných proporcí. Viz Obrázek~\ref{fig:smpl-stage-1}.
+Model SMPL vzniká ve třech krocích. Nejprve vychází z kanonického tvaru těla v klidové póze $\bar{T}$, který reprezentuje průměrnou postavu. Přičtením tvarové odchylky $B_s(\beta)$ vznikne síťovina v T-pose s danými tělesnými proporcemi; současně se z $\beta$ odvodí poloha kloubů $J(\beta)$ (viz Obrázek~\ref{fig:smpl-stage-1}).
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.6\textwidth]{img/stage_1.png}
-    \caption{SMPL -- stage 1}
+    \caption{SMPL: první fáze}
     \label{fig:smpl-stage-1}
 \end{figure}
 
-Při pohybu se naše tkáně napínají a ohýbají a s tím musíme počítat i u počítačového modelu člověka. Dále tedy upravíme proporce těla tak, aby odpovídali po pozici do které chceme model dostat tím, že k modelu přidáme příspěvek $B_P(\theta)$ a vznikne tak pozice $T_p(\beta, \theta)$. Viz Obrázek~\ref{fig:smpl-stage-2}.
+Následně se přidá pózová korekce $B_p(\theta)$, která modeluje deformace při ohybu kloubů, a získá se $T_p(\beta, \theta)$ (viz Obrázek~\ref{fig:smpl-stage-2}).
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.6\textwidth]{img/stage_2.png}
-    \caption{SMPL -- stage 2}
+    \caption{SMPL: druhá fáza}
     \label{fig:smpl-stage-2}
 \end{figure}
 
-Nakonec se vše poskládá dohromady pomocí funkce $W(\cdot)$ ještě s konečnou pozicí končetin $\theta$ a maticí $\mathcal{W}$. Tato matice spolu s $B_s(\beta)$ a $B_p(\theta)$ jsou natrénované hodnoty na tisících lidských skenů \cite{SMPL:2015}. Viz Obrázek~\ref{fig:smpl-stage-3}.
+V posledním kroku se pomocí funkce $W(\cdot)$, parametrů pózy $\theta$ a váhové matice $\mathcal{W}$ vypočítá výsledná síťovina v požadované póze; tyto složky jsou naučené na tisících 3D skenech lidských těl \cite{SMPL:2015} (viz Obrázek~\ref{fig:smpl-stage-3}).
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.6\textwidth]{img/stage_3.png}
-    \caption{SMPL -- stage 3}
+    \caption{SMPL: třetí fáze}
     \label{fig:smpl-stage-3}
 \end{figure}
 
@@ -242,8 +242,8 @@ Jádrem celé myšlenky je kanonická reprezentace těla (tedy povrch „průmě
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.95\textwidth]{img/DenseAnnoFigure.png}
-    \caption{DensePose -- DenseAnnoFigue, Zobrazuje korespondenci 2D pixelu s vybraným bodem na kanonické 3D síti lidského těla.}
-    \label{fig:densepose-DenseAnnoFigue}
+    \caption{DensePose: korespondence 2D pixelu s vybraným bodem na kanonické 3D síti lidského těla.}
+    \label{fig:densepose-DenseAnnoFigure}
 \end{figure}
 
 \subsection{DensePose v1: mapování pomocí (I, U, V)}
@@ -251,7 +251,7 @@ Jádrem celé myšlenky je kanonická reprezentace těla (tedy povrch „průmě
 Původní verze DensePose (v této práci ji budu označovat jako DensePose v1) používá parametrizaci povrchu těla pomocí několika tělesných „chartů“ (segmentů). Výstupem je pro každý pixel na postavě trojice (I, U, V) \cite{guler2018densepose}:
 
 \begin{itemize}
-    \item \textbf{I:} index tělesného segmentu (např. levou paži, trup apod.),
+    \item \textbf{I:} index tělesného segmentu (např. levá paže, trup apod.),
     \item \textbf{U, V:} souřadnice v rámci 2D parametrizace daného segmentu.
 \end{itemize}
 
@@ -283,7 +283,7 @@ Právě tyto slabiny jsou hlavním důvodem, proč jsem se rozhodl na DensePose 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.95\textwidth]{img/90284_densepose.jpg}
-    \caption{DensePose -- Showcase, Použili jsme barevnou mapu (colormap) Jet pro ilustraci. Obě nohy bledě modrou a tedy detekovány jako pravé. Útržek tmavě modré a tedy jiné končetiny je vidět vlevo a odporuje spojitosti těla. Vpravo na obrázku je zase vidět problém s \enquote{lupínky}.}
+    \caption{DensePose: ukázka typických chyb. Pro ilustraci je použita barevná mapa (colormap) Jet. Obě nohy jsou obarvené stejně, a tedy chybně detekované jako pravé; vlevo je zároveň vidět izolovaný úsek jiné končetiny, který narušuje spojitost těla. Vpravo se projevuje lokální nekonzistence přiřazení (\enquote{lupínky}).}
     \label{fig:densepose-showcase}
 \end{figure}
 
@@ -307,9 +307,9 @@ Ve všech metodách optimalizuji stejné proměnné: globální orientaci a posu
 
 \subsection{Návrh metody}
 
-Nejdříve jsem se rozhodl věnovat optimalizační úloze, kde zvolím nějakou chybu pro libovolně promítnutý SMPL model a minimalizací této chyby bych se měl dostat k modelu těla ve 3D, které co nejlépe koresponduje s detekcí člověka v obrázku. Tento nový odhad bych považoval za správnější, jelikož jeho lidská omezení zamezují standardním chybám DensePose. 
+V této variantě formuluji fitting jako optimalizační úlohu: definuji ztrátovou funkci, která měří neshodu mezi projekcí modelu SMPL a výstupem DensePose, a minimalizací této ztráty hledám 3D konfiguraci těla, která co nejlépe odpovídá detekci osoby v obraze. Předpokládám, že SMPL bude působit jako humanoidní omezení a potlačí typické lokální chyby DensePose.
 
-DensePose CSE mi pro každý pixel postavy nevrátí jen informaci „tady je člověk“, ale také odhad „kde na kanonickém těle tento pixel leží“. Prakticky pracuji s maskou $S$ a embeddingy $\mathbf{e}_p$ pro pixely $p \in S$ (značení viz úvod kapitoly).
+DensePose CSE mi pro každý pixel postavy nevrátí jen informaci \enquote{tady je člověk}, ale také odhad \enquote{kde na kanonickém těle tento pixel leží}. Prakticky pracuji s maskou $S$ a embeddingy $\mathbf{e}_p$ pro pixely $p \in S$ (značení viz úvod kapitoly).
 
 Na druhé straně úlohy nějak inicializuji první pozici SMPL. Poté potřebuji vypočítat, jaký „bod na těle“ se v každém pixelu skutečně nachází. To není totéž jako vzít nejbližší promítnutý vrchol, protože projekce do 2D ignoruje zákryty: zadní část těla může být promítnuta do stejné oblasti obrazu jako přední část, ale ve skutečnosti ji kamera nevidí. Proto jsem uvažoval o renderování SMPL z pohledu kamery, ideálně tak, aby pro každý pixel bylo jasné, který trojúhelník sítě je opravdu viditelný (tj. nejblíže kameře). 
 
@@ -338,7 +338,7 @@ Hlavní očekávaný přínos je v tom, že SMPL funguje jako humanoidní omezen
 
 V implementaci jsem se snažil co nejpříměji zrealizovat veličiny z návrhu metody: z DensePose beru masku pixelů těla $S$ a embeddingy $\mathbf{e}_p$, ze SMPL v každé iteraci získám projekci do obrazu a pro stejné pixely určuji, který bod na síťovině je z pohledu kamery skutečně vidět. Teprve potom má smysl embeddingy porovnávat, protože bez ošetření zákrytů by do stejné oblasti obrazu „padaly“ i části těla, které kamera ve skutečnosti nevidí.
 
-Nejdříve si připravím DensePose výstup pro jednu detekovanou osobu (bounding box, maska $S$ a embedding pole). SMPL inicializuji pouze heuristicky v neutrální póze a k detekci jej přiblížím hrubým odhadem posunu pomocí \code{get_translation} v \code{common/utils.py}. Tato inicializace je čistě praktická: cílem není odhadnout přesnou pozici, ale dostat model do rozumné hloubky a měřítka, aby optimalizace nezačínala v degenerovaném stavu. Pro to, aby moje metoda začala fungovat mi stačí rozumný překryv těl a dále by se měl program optimalizovat sám. 
+Nejprve si připravím DensePose výstup pro jednu detekovanou osobu (bounding box, masku $S$ a pole embeddingů). SMPL inicializuji pouze heuristicky v neutrální póze a k detekci jej přiblížím hrubým odhadem posunu pomocí \code{get_translation} v \code{common/utils.py}. Tato inicializace je čistě praktická: cílem není odhadnout přesnou polohu, ale dostat model do rozumné hloubky a měřítka, aby optimalizace nezačínala v degenerovaném stavu. Aby metoda začala fungovat, stačí přibližný překryv těl; další doladění provede optimalizace.
 
 \begin{figure}[htbp]
     \centering
@@ -351,7 +351,7 @@ Pro projekci používám matici intrinsics $K$ sestavenou funkcí \code{get_came
 
 Viditelnost jsem realizoval ray tracingem ve funkci \code{visible_vertices_gpu}. Prakticky to znamená: pro každý dotazovaný pixel hledám trojúhelník sítě, jehož projekce pixel obsahuje, a z kandidátů vyberu ten s nejmenší hloubkou (nejbližší kameře). Původně jsem chtěl využít barycentrické váhy a embedding interpolovat uvnitř trojúhelníku tak, jak je to v návrhu metody. V prototypu jsem ale nakonec zvolil jednodušší kompromis: z viditelného trojúhelníku vybírám jeden reprezentativní vrchol (nejbližší bodu průsečíku) a embedding beru přímo z jeho předpočítané tabulky. Tím se ztrácí část „plynulosti“ vůči parametrům, ale implementace je výrazně jednodušší a paměťově méně náročná.
 
-Výpočet viditelnosti jsem nejdříve napsal na CPU v NumPy \cite{harris2020numpy}, ale rychle se ukázalo, že je to pro reálné rozlišení příliš pomalé. Přepsání do PyTorch \cite{paszke2019pytorch} mi umožnilo využít GPU a hlavně vektorizovat celé bloky výpočtu: místo smyček nad pixely se pracuje s tenzory a maskami (typicky tabulka dotazovaných pixelů vůči kandidátním trojúhelníkům), což je v \code{common/utils.py} vidět i podle značení tvarů v komentářích. Parametry SMPL pak optimalizuji gradientně pomocí Adam \cite{kingma2015adam}, stejně jako v \code{projects/euclidean_fitter.py}. Optimalizované proměnné jsou globální orientace, posun, póza $\theta$ a tvar $\beta$; v každé iteraci přepočtu síťovinu, projekci, viditelnost a následně minimalizuji ztrátu založenou na podobnosti embeddingů na množině pixelů $p \in S$. Počet iterací jsem určil experimentálně na 400. Při větším počtu iterací již nepozoruji žádnou změnu (viz Obrázek~\ref{fig:ztrata-podle-iterace}) hodnoty ztrátové funkce a zbytečně bych prodlužoval čas čekání na výstup.
+Výpočet viditelnosti jsem nejdříve napsal na CPU v NumPy \cite{harris2020numpy}, ale rychle se ukázalo, že je to pro reálné rozlišení příliš pomalé. Přepsání do PyTorch \cite{paszke2019pytorch} mi umožnilo využít GPU a hlavně vektorizovat celé bloky výpočtu: místo smyček nad pixely se pracuje s tenzory a maskami (typicky tabulka dotazovaných pixelů vůči kandidátním trojúhelníkům), což je v \code{common/utils.py} vidět i podle značení tvarů v komentářích. Parametry SMPL pak optimalizuji gradientně pomocí optimalizátoru Adam \cite{kingma2015adam}, stejně jako v \code{projects/euclidean_fitter.py}. Optimalizované proměnné jsou globální orientace, posun, póza $\theta$ a tvar $\beta$; v každé iteraci přepočtu síťovinu, projekci, viditelnost a následně minimalizuji ztrátu založenou na podobnosti embeddingů na množině pixelů $p \in S$. Počet iterací jsem určil experimentálně na 400. Při větším počtu iterací již nepozoruji žádnou změnu (viz Obrázek~\ref{fig:ztrata-podle-iterace}) hodnoty ztrátové funkce a zbytečně bych prodlužoval čas čekání na výstup.
 
 \begin{figure}[htbp]
     \centering
@@ -364,12 +364,12 @@ Výpočet viditelnosti jsem nejdříve napsal na CPU v NumPy \cite{harris2020num
 
 Metoda mi na papíře dávala smysl, protože kombinuje dva silné signály: DensePose poskytuje husté korespondence v obraze a SMPL vynucuje globálně konzistentní lidskou geometrii. V praxi se ale ukázalo, že právě část „pro každý pixel spočti správný bod na povrchu“ je výpočetně i numericky citlivá.
 
-Prvním limitem byla náročnost. Ray tracing nad trojúhelníkovou sítí pro velké množství pixelů se rychle stává úzkým hrdlem a i po přepsání do GPU verze bylo ladění pomalé (zejména pokud jsem chtěl testovat více obrázků nebo vyšší rozlišení masky). Druhý, důležitější problém byla stabilita optimalizace. Opakovaně se mi stávalo, že SMPL vycházel posunutý vůči detekci, případně se optimalizátor „chytil“ špatného lokálního minima a póza se začala hroutit do nelidských tvarů. V této fázi jsem nedokázal jednoznačně izolovat jedinou příčinu, ale prakticky se ukázalo, že metoda je velmi citlivá na inicializaci (hlavně posun a znaménko/škálování hloubky) a na to, jak přesně se ošetří projekce bodů za kamerou. Navíc je zde nepříjemná vlastnost samotné viditelnosti: i malé změny parametrů mohou skokově změnit, který trojúhelník je „první průsečík“, a tím se zhoršuje chování gradientní optimalizace.
+Prvním limitem byla náročnost. Ray tracing nad trojúhelníkovou sítí pro velké množství pixelů se rychle stává úzkým hrdlem a i po přepsání do GPU verze bylo ladění pomalé (zejména pokud jsem chtěl testovat více obrázků nebo vyšší rozlišení masky). Druhým, důležitějším problémem byla stabilita optimalizace. Opakovaně se mi stávalo, že SMPL vycházel posunutý vůči detekci, případně se optimalizátor „chytil“ špatného lokálního minima a póza se začala hroutit do nelidských tvarů. V této fázi jsem nedokázal jednoznačně izolovat jedinou příčinu, ale prakticky se ukázalo, že metoda je velmi citlivá na inicializaci (hlavně posun a znaménko/škálování hloubky) a na to, jak přesně se ošetří projekce bodů za kamerou. Navíc je zde nepříjemná vlastnost samotné viditelnosti: i malé změny parametrů mohou skokově změnit, který trojúhelník je „první průsečík“, a tím se zhoršuje chování gradientní optimalizace.
 Z hlediska cíle maturitní práce pro mě bylo klíčové mít metodu, se kterou lze rychle iterovat a která dává interpretovatelné výsledky i na hraničních případech. 
 
 Proto jsem tuto variantu vyhodnotil jako slepou uličku a přešel jsem k jednoduššímu měření ztráty v obraze pomocí euklidovské vzdálenosti, které sice obětuje část původní elegance, ale výrazně zlepšuje stabilitu experimentů.
 
- Následující metoda \code{Euklidovský fitter} vznikla jako zjednodušená varianta předchozího prototypu. Kompletní implementace je v souboru \code{projects/euclidean_fitter.py}; v \code{common/utils.py} pak zůstaly pomocné funkce pro práci s projekcí a výpočtem ztráty.
+Následující metoda \code{Euklidovský fitter} vznikla jako zjednodušená varianta předchozího prototypu. Kompletní implementace je v souboru \code{projects/euclidean_fitter.py}; v \code{common/utils.py} pak zůstaly pomocné funkce pro práci s projekcí a výpočtem ztráty.
 
 \section{Euklidovský fitter: loss v obrazové rovině}
 
@@ -412,9 +412,9 @@ Metoda se tedy shoduje s předchozím přístupem v tom, že stále využívá D
 
 \subsection{Implementace}
 
- Implementace v \code{projects/euclidean_fitter.py} zachovává stejnou kostru jako předchozí metoda: z detekce DensePose vezmu bounding box, masku $S$ a embeddingy, SMPL inicializuji v neutrální póze a optimalizuji proměnné \code{global_orient}, \code{transl}, \code{pose} a \code{betas} pomocí Adam \cite{kingma2015adam}. Zásadní rozdíl je pouze v tom, jakým způsobem z těchto dat vytvořím ztrátu.
+Implementace v \code{projects/euclidean_fitter.py} zachovává stejnou kostru jako předchozí metoda: z detekce DensePose vezmu bounding box, masku $S$ a embeddingy, SMPL inicializuji v neutrální póze a optimalizuji proměnné \code{global_orient}, \code{transl}, \code{pose} a \code{betas} pomocí optimalizátoru Adam \cite{kingma2015adam}. Zásadní rozdíl je pouze v tom, jakým způsobem z těchto dat vytvořím ztrátu.
 
- Nejdříve pro každou detekovanou osobu převedu DensePose embeddingy na mapu indexů vrcholů $I(p)$. To zajišťuje funkce \code{get_closest_vertices_mask_from_ES}, která pro každý pixel v masce vybere vrchol s nejvyšší podobností embeddingu. V kódu tuto mapu počítám ve dvou rozlišeních: v původním rozlišení bounding boxu pro vizualizaci a v menším rozlišení pro samotný výpočet ztráty. Rozlišení pro loss volím tak, aby mělo přibližně konstantní plochu (proměnná \code{LOSS_AREA}); tím udržuji počet bodů v $S$ a výpočetní náročnost přibližně stejnou napříč různě velkými detekcemi.
+Nejdříve pro každou detekovanou osobu převedu DensePose embeddingy na mapu indexů vrcholů $I(p)$. To zajišťuje funkce \code{get_closest_vertices_mask_from_ES}, která pro každý pixel v masce vybere vrchol s nejvyšší podobností embeddingu. V kódu tuto mapu počítám ve dvou rozlišeních: v původním rozlišení bounding boxu pro vizualizaci a v menším rozlišení pro samotný výpočet ztráty. Rozlišení pro loss volím tak, aby mělo přibližně konstantní plochu (proměnná \code{LOSS_AREA}); tím udržuji počet bodů v $S$ a výpočetní náročnost přibližně stejnou napříč různě velkými detekcemi.
 
 Z mapy $I(p)$ si pak připravím dvě pole:
 \begin{itemize}
@@ -426,6 +426,8 @@ Volitelně mohu omezit optimalizaci pouze na torso (\code{TORSO_MASK}), čímž 
 V každé iteraci vyrenderuji (tj. spočtu) aktuální SMPL vrcholy, promítnu je do obrazu pomocí intrinsics matice $K$ z \code{get_camera_intrinsics} a převedu je do stejné souřadnicové soustavy jako DensePose body: odečtu levý horní roh bounding boxu a aplikuji stejné škálování. Výsledkem je pole \code{SMPL_coordinates} s body $\mathbf{x}_i$.
 
 Samotnou ztrátu počítá funkce \code{euclid_loss_gpu} v \code{common/utils.py}. Naivní CPU varianta by pro každý vrchol $i$ musela prohledat všechny DensePose pixely a najít ty, které mají $I(p)=i$, což vede k pomalým vnořeným smyčkám. GPU verzi jsem proto napsal v PyTorch tak, aby byla plně vektorizovaná: vytvořím tabulku shod indexů (masku tvaru $E \times S$), pomocí broadcastingu spočtu euklidovské vzdálenosti pouze pro shodné dvojice a pro každý vrchol vezmu minimum. Tato část už je analogická postupu z předchozí sekce, kde jsem kvůli výkonu také přecházel od smyček k tenzorovým operacím na GPU.
+
+Příklad outputu je v příloze \ref{app:overview-434204} nebo na repozitáři pod \code{documentation/img/output/}
 
 \subsection{Hodnocení a výsledky}
 
@@ -536,8 +538,6 @@ Současně jde o metodu s jasnými riziky. Nízký rozptyl nemusí znamenat, že
 
 Jako přirozené pokračování bych nejprve ověřil samotnou hypotézu kvantitativně: na anotovaných datech porovnat $\sigma_i$ se skutečnou chybovostí přiřazení vrcholů a určit rozumné prahy a tvar váhové funkce. Teprve potom dává smysl váhy $w_i$ integrovat do fittingu (např. jako váženou verzi euklidovské ztráty) a porovnat stabilitu optimalizace vůči euklidovskému fitteru.
 
-
-
 \chapter{Technická dokumentace}
 
 Tato kapitola shrnuje minimální postup, jak repozitář \textbf{SimonPose} nainstalovat a jak reprodukovat hlavní experimenty z praktické části. Podrobnější a průběžně aktualizovaná dokumentace je součástí repozitáře v adresáři \code{docs/}; v textu proto odkazuji na konkrétní soubory a zde uvádím pouze stručný \enquote{quickstart}.
@@ -556,7 +556,7 @@ Tato kapitola shrnuje minimální postup, jak repozitář \textbf{SimonPose} nai
 
 \section{Minimální požadavky}
 
-Projekt je otestován primárně na Linuxu s NVIDIA GPU. Na macOS je běh typicky pouze na CPU a výrazně pomalý.
+Projekt je otestován primárně na Linuxu s NVIDIA GPU. Na macOS běh typicky probíhá pouze na CPU a je výrazně pomalejší.
 
 \begin{itemize}
     \item \textbf{Python:} 3.11.
@@ -650,7 +650,7 @@ python -m projects.euclidean_fitter -n 1 -i 10
 python -m projects.euclidean_fitter --help
 \end{codeblock}
 
-Výstupy se ukládají do \code{output/} (např. \code{output/euclidean_fitter_0/}). Přehled generovaných souborů, jejich význam a doporučené experimentální \enquote{knoby} popisuje \code{docs/running.md}. Pro řešení typických chyb (CUDA/Detectron2/importy/chybějící soubory) používám \code{docs/troubleshooting.md}.
+Výstupy se ukládají do \code{output/} (např. \code{output/euclidean_fitter_0/}). Přehled generovaných souborů, jejich význam a doporučené experimentální parametry popisuje \code{docs/running.md}. Pro řešení typických chyb (CUDA/Detectron2/importy/chybějící soubory) používám \code{docs/troubleshooting.md}.
 
 \section{Poznámky k reprodukovatelnosti}
 
@@ -693,14 +693,34 @@ Navzdory technické náročnosti mi práce dávala smysl a postupně mě začala
 \addcontentsline{toc}{chapter}{Seznam obrázků}
 
 %%% Seznam tabulek
-\clearpage
-\listoftables
-\addcontentsline{toc}{chapter}{Seznam tabulek}
+% \clearpage
+% \listoftables
+% \addcontentsline{toc}{chapter}{Seznam tabulek}
 
 %%% Přílohy k práci, existují-li. Každá příloha musí být alespoň jednou
 %%% odkazována z vlastního textu práce. Přílohy se číslují.
 
-%\part*{Přílohy}
-%\appendix
+\clearpage
+\part*{Přílohy}
+\addcontentsline{toc}{part}{Přílohy}
+\appendix
+
+\chapter{Euklidovský fitter: Output}
+
+\label{app:overview-90284}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth,height=0.95\textheight,keepaspectratio]{img/output/90284_0_overview.png}
+    \caption{Přehled iterací fittingu (COCO 90284, person 0).}
+    \label{fig:overview-90284}
+\end{figure}
+
+\label{app:overview-434204}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth,height=0.95\textheight,keepaspectratio]{img/output/434204_0_overview.png}
+    \caption{Přehled iterací fittingu (COCO 434204, person 0).}
+    \label{fig:overview-434204}
+\end{figure}
 
 \end{document}
