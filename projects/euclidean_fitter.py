@@ -90,11 +90,11 @@ final_losses = []
 if TORSO_MASK:
     torso_mask = torch.zeros(6890, dtype=torch.bool, device=device) # mask S torso vertices in the SMPL mesh
 
-    with open(os.path.join(DATA_DIR, "body_parts_to_6890_points.json"), "r") as f:
-        body_parts_to_points = json.load(f)
+    with open(SMPL_VERT_SEGMENTATION, "r") as f:
+        smpl_vert_segmentation = json.load(f)
 
     for key in ['spine', 'spine1', 'spine2', 'hips', 'leftShoulder', 'rightShoulder']:
-        torso_mask[body_parts_to_points[key]] = True
+        torso_mask[smpl_vert_segmentation[key]] = True
         
 else:
     torso_mask = torch.ones(6890, dtype=torch.bool, device=device)

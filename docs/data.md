@@ -53,6 +53,17 @@ curl -L -o data/densepose_minival2014_cse.json \
   "https://dl.fbaipublicfiles.com/densepose/annotations/coco_cse/densepose_minival2014_cse.json"
 ```
 
+## SMPL body part mapping
+
+```bash
+mkdir -p data
+curl -L -o data/smpl_vert_segmentation.json \
+  "https://github.com/Meshcapade/wiki/blob/main/assets/SMPL_body_segmentation/smpl/smpl_vert_segmentation.json?raw=true"
+```
+
+
+
+
 ## DensePose model weights
 
 This repo uses the R101 CSE checkpoint referenced in the Detectron2 DensePose docs.

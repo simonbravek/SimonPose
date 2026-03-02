@@ -10,5 +10,6 @@ OUTPUT_ROOT = REPO_ROOT / "output"
 
 # Concrete paths
 SMPL_MODEL = MODELS_DIR / "smpl/models/basicmodel_neutral_lbs_10_207_0_v1.1.0.pkl"
+SMPL_VERT_SEGMENTATION = DATA_DIR / "smpl_vert_segmentation.json"
 DENSEPOSE_CONFIG = EXTERNAL_DIR / "detectron2/projects/DensePose/configs/cse/densepose_rcnn_R_101_FPN_DL_s1x.yaml"
 DENSEPOSE_WEIGHTS = MODELS_DIR / "densepose/model_final_1d3314.pkl"

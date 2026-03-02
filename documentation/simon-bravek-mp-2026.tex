@@ -1,4 +1,4 @@
-\documentclass[11pt,a4paper,twoside,openright]{report}
+\documentclass[11pt,a4paper,twoside,optheenright]{report}
 
 \usepackage[top=25mm,bottom=25mm,right=25mm,left=30mm,head=12.5mm,foot=12.5mm]{geometry}
 \let\openright=\cleardoublepage
@@ -551,7 +551,7 @@ Nejdůležitějším předpokladem je funkční GPU stack, protože DensePose i 
 
  Repozitář je navržen tak, aby se vše spouštělo z kořene projektu. Cesty k datům a modelům jsou centralizované v souboru \code{config.py}. Ve výchozím nastavení se předpokládá následující rozložení:
 
-\begin{code}
+\begin{codeblock}
 data/
   val2014/
     COCO_val2014_*.jpg
@@ -568,7 +568,7 @@ external/
   detectron2/
 
 output/
-\end{code}
+\end{codeblock}
 
 Z hlediska čitelnosti kódu je důležité rozdělení na dvě vrstvy:
 \begin{itemize}
@@ -584,37 +584,37 @@ Projekt je nejjednodušší spouštět ve virtuálním prostředí. Postup níž
 
 \begin{enumerate}
 \item \textbf{Vytvoření virtuálního prostředí:}
-\begin{code}
+\begin{codeblock}
 python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install -U pip setuptools wheel
-\end{code}
+\end{codeblock}
 
 \item \textbf{Instalace PyTorch:} je potřeba zvolit build odpovídající CUDA runtime. Následující příklad instaluje PyTorch 2.4.0 pro CUDA 12.1:
-\begin{code}
+\begin{codeblock}
 pip install torch==2.4.0+cu121 torchvision==0.19.0+cu121 \
 --index-url https://download.pytorch.org/whl/cu121
-\end{code}
+\end{codeblock}
 
 Pokud si nejsem jistý správnou kombinací, řídím se oficiálním instalátorem: \url{https://pytorch.org/get-started/locally/}.
 
 \item \textbf{Instalace ostatních Python balíčků:}
 
-\begin{code}
+\begin{codeblock}
 pip install -r requirements.txt
-\end{code}
+\end{codeblock}
 Soubor \code{requirements.txt} záměrně neinstaluje Detectron2 ani DensePose.
 
 \item \textbf{Instalace Detectron2 a DensePose ze zdrojů:} repozitář očekává Detectron2 v \path{external/detectron2/}.
 
-\begin{code}
+\begin{codeblock}
 mkdir -p external
 cd external
 git clone https://github.com/facebookresearch/detectron2.git
 
 pip install --no-build-isolation -e external/detectron2
 pip install --no-build-isolation -e external/detectron2/projects/DensePose
-\end{code}
+\end{codeblock}
 \end{enumerate}
 
 \subsection{Instalace na clusteru FEL ČVUT (stručně)}
@@ -638,12 +638,12 @@ Soubor \code{config.py} je záměrně jednoduchý: definuje kořen repozitáře 
 
 Rychlá kontrola, že se načítají správné cesty:
 
-\begin{code}
+\begin{codeblock}
 python
 from config import *; print(SMPL_MODEL)
 print(DENSEPOSE_CONFIG)
 print(DENSEPOSE_WEIGHTS)
-\end{code}
+\end{codeblock}
 
 Pokud ukládám data mimo repozitář (typicky na clusteru), mohu buď použít symbolické odkazy na výchozí cesty, nebo \code{config.py} upravit.
 
@@ -651,15 +651,15 @@ Pokud ukládám data mimo repozitář (typicky na clusteru), mohu buď použít 
 
 Je důležité spouštět skripty \textbf{z kořene repozitáře} a \textbf{jako modul}. Tím se vyhnu chybám s importy (např. \code{from config import *}):
 
-\begin{code}
+\begin{codeblock}
 python -m projects.euclidean_fitter
-\end{code}
+\end{codeblock}
 
 Každý skript má jednoduché CLI přes \code{argparse}. Parametry si ověřím pomocí:
 
-\begin{code}
+\begin{codeblock}
 python -m projects.euclidean_fitter --help
-\end{code}
+\end{codeblock}
 
 \subsection{\code{projects/euclidean_fitter.py} (hlavní spustitelný experiment)}
 
@@ -668,15 +668,15 @@ Tento skript odpovídá metodě „Euklidovský fitter“ popsané v explorativn
 
 Typické spuštění pro rychlou kontrolu (málo iterací):
 
-\begin{code}
+\begin{codeblock}
 python -m projects.euclidean_fitter -n 1 -i 10
-\end{code}
+\end{codeblock}
 
 Pro „plnohodnotný“ běh (více iterací):
 
-\begin{code}
+\begin{codeblock}
 python -m projects.euclidean_fitter -n 1 -i 300
-\end{code}
+\end{codeblock}
 
 Poznámka k implementaci: skript aktuálně zpracuje pouze první detekovanou osobu v obrázku (ve smyčce přes osoby je \code{break}), což je záměrné zjednodušení pro rychlé ladění.
 
@@ -686,9 +686,9 @@ Skript „Precizní fitter“ je v aktuální verzi prototyp pro měření stabi
 
 Spuštění:
 
-\begin{code}
+\begin{codeblock}
 python -m projects.precission_fitter -n 10
-\end{code}
+\end{codeblock}
 
 \section{Výstupy}
 
@@ -730,7 +730,7 @@ Zároveň platí, že COCO, DensePose a SMPL mají vlastní licence a nejsou v r
 \pagestyle{empty}
 \addcontentsline{toc}{chapter}{Závěr}
 
-Závěr obsahuje shrnutí práce a vyjadřuje se k míře splnění jejího zadání. Dále by se zde mělo objevit sebehodnocení studenta a informace o tom, co nového se naučil a jak vnímal svou práci na projektu.
+(Závěr obsahuje shrnutí práce a vyjadřuje se k míře splnění jejího zadání. Dále by se zde mělo objevit sebehodnocení studenta a informace o tom, co nového se naučil a jak vnímal svou práci na projektu.)
 
 Ačkoli se mi nepovedlo dokončit své bádání, byl jsem schopný přijít na zajímavé metody a třeba v tom budu pokračovat v budoucnu. 
 

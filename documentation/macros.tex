@@ -124,9 +124,14 @@
 \hypersetup{breaklinks=true}
 \hypersetup{hidelinks}
 
+% Make \code safe inside section/chapter titles (PDF bookmarks).
+\pdfstringdefDisableCommands{%
+  \def\code#1{\detokenize{#1}}%
+}
+
 %%% Prostředí pro sazbu kódu, případně vstupu/výstupu počítačových
 %%% programů. (Vyžaduje balíček fancyvrb -- fancy verbatim.)
 
-\DefineVerbatimEnvironment{code}{Verbatim}{fontsize=\small, frame=single}
+\DefineVerbatimEnvironment{codeblock}{Verbatim}{fontsize=\small, frame=single}
 
 \newcommand{\code}[1]{\texttt{\nolinkurl{#1}}}
