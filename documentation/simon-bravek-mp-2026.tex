@@ -75,8 +75,7 @@ The methodology is exploratory and follows a Fail-Fast approach: quickly formula
 
 \textbf{embedding} je vektorové pole zachycující význam obrázku, více v teoretické části
 
-\chapter*{Úvod}
-\addcontentsline{toc}{chapter}{Úvod}
+\chapter{Úvod}
 
 \section{Analýza postavy v digitálním světě}
 
@@ -114,6 +113,10 @@ Zvolená metodika se opírá o princip Fail-Fast:
 \end{itemize}
 
 Výsledkem práce je ucelený přehled vyzkoušených metod, jejich kritické zhodnocení a dokumentace slepých i perspektivních uliček, které mohou sloužit jako inspirace pro další vývoj v oblasti monokulární 3D rekonstrukce člověka.
+
+\section{Struktura práce}
+
+Teoretická část shrnuje klíčové pojmy a principy použitých metod (DensePose a parametrický model SMPL) a motivuje, proč jejich kombinace dává smysl pro robustnější odhad pózy v reálných scénách. Praktická část popisuje tři zkoušené varianty fittingu SMPL do signálu z DensePose, včetně implementačních kompromisů a zhodnocení. Technická dokumentace slouží jako praktický návod k instalaci a reprodukci experimentů v repozitáři SimonPose. Závěr stručně shrnuje dosažené výsledky, limity a možné směry pokračování.
 
 \chapter{Teoretická část}
 \pagestyle{fancy}
@@ -256,32 +259,37 @@ Právě tyto slabiny jsou hlavním důvodem, proč jsem se rozhodl na DensePose 
     \label{fig:densepose-showcase}
 \end{figure}
 
-\chapter{Explorativní část}
+\chapter{Praktická část}
 
-V rámci své explorativní analýzi jsem navrhl 3 možná metodická zlepšení. Všechna z nich využívají metodu napasování (fitting) SMPL postavy. 
+V této kapitole popisuji praktickou část práce: tři varianty fittingu modelu SMPL do signálu z DensePose. Postup je záměrně explorativní: cílem je rychle ověřovat hypotézy, pojmenovat limity a z výsledků (včetně neúspěchů) vyvodit další směr.
 
-\section{Embedding fitter}
+\section{Společné značení a postup}
+
+V textu používám termín \emph{fitting} pro napasování parametrů SMPL tak, aby jeho projekce do obrazu co nejlépe odpovídala výstupu DensePose. Pracuji s DensePose v2 ve variantě Continuous Surface Embeddings, dále jen CSE, která pro každou detekovanou osobu vrací masku $S$ a embedding $\mathbf{e}_p \in \mathbb{R}^D$ pro každý pixel $p \in S$.
+
+Pro SMPL vrcholy existují předpočítané embeddingy $\mathbf{v}_i$. V řadě experimentů proto nejprve převádím DensePose embeddingy na index vrcholu
+\[
+I(p) = \arg\max_i \langle \hat{\mathbf{e}}_p, \hat{\mathbf{v}}_i \rangle,
+\]
+kde $\hat{\mathbf{e}}$ značí L2-normalizovaný embedding. Souřadnici pixelu v obrazové rovině označuji $\mathbf{u}_p \in \mathbb{R}^2$ a projekci SMPL vrcholu $i$ do stejné soustavy jako $\mathbf{x}_i \in \mathbb{R}^2$.
+
+Ve všech metodách optimalizuji stejné proměnné: globální orientaci a posun vůči kameře, pózu $\theta$ a tvar $\beta$. Jednotlivé varianty se liší pouze ztrátovou funkcí a tím, jakým způsobem z DensePose vytvářejí korespondence pro optimalizaci. Experimenty provádím na snímcích z COCO DensePose (minival) a kvalitu posuzuji kombinací průběhu ztráty a vizuální shody renderovaného SMPL s DensePose výstupem.
+
+\section{Embedding fitter: loss nad embeddingy a ošetření viditelnosti}
 
 \subsection{Návrh metody}
 
 Nejdříve jsem se rozhodl věnovat optimalizační úloze, kde zvolím nějakou chybu pro libovolně promítnutý SMPL model a minimalizací této chyby bych se měl dostat k modelu těla ve 3D, které co nejlépe koresponduje s detekcí člověka v obrázku. Tento nový odhad bych považoval za správnější, jelikož jeho lidská omezení zamezují standardním chybám DensePose. 
 
-DensePose v2 (CSE) mi pro každý pixel postavy nevrátí jen informaci „tady je člověk“, ale také odhad „kde na kanonickém těle tento pixel leží“. Konkrétně: DensePose pracuje v rámci ohraničujícího rámečku (bounding boxu) detekované osoby a vytvoří 
+DensePose CSE mi pro každý pixel postavy nevrátí jen informaci „tady je člověk“, ale také odhad „kde na kanonickém těle tento pixel leží“. Prakticky pracuji s maskou $S$ a embeddingy $\mathbf{e}_p$ pro pixely $p \in S$ (značení viz úvod kapitoly).
 
-\begin{itemize}
-    \item \textbf{masku postavy $S$} a 
-    \item \textbf{embedding $E$} pro každý pixel.
-\end{itemize}
+Na druhé straně úlohy nějak inicializuji první pozici SMPL. Poté potřebuji vypočítat, jaký „bod na těle“ se v každém pixelu skutečně nachází. To není totéž jako vzít nejbližší promítnutý vrchol, protože projekce do 2D ignoruje zákryty: zadní část těla může být promítnuta do stejné oblasti obrazu jako přední část, ale ve skutečnosti ji kamera nevidí. Proto jsem uvažoval o renderování SMPL z pohledu kamery, ideálně tak, aby pro každý pixel bylo jasné, který trojúhelník sítě je opravdu viditelný (tj. nejblíže kameře). 
 
-Maska je množina pixelů, které DensePose označí jako tělo. Pro každý pixel $p \in S$ DensePose predikuje vektor $\mathbf{e}_p \in \mathbb{R}^D$ (embedding), kde $D$ je pevně daná dimenze (typicky desítky čísel).
-
-Na druhé straně úlohy nějak inicializuji první pozici SMPL. Poté potřebuji vypočítat,jaký „bod na těle“ se v každém pixelu skutečně nachází. To není totéž jako vzít nejbližší promítnutý vrchol, protože projekce do 2D ignoruje zákryty: zadní část těla může být promítnuta do stejné oblasti obrazu jako přední část, ale ve skutečnosti ji kamera nevidí. Proto jsem uvažoval o renderování SMPL z pohledu kamery, ideálně tak, aby pro každý pixel bylo jasné, který trojúhelník sítě je opravdu viditelný (tj. nejblíže kameře). 
-
-Výsledkem renderování pro pixel $p$ je trojúhelník na SMPL síťovině, do kterého paprsek narazil. Trojúhelník popíšu třemi indexy vrcholů $(i, j, k)$. Zároveň dostanu tzv. barycentrické váhy $(\alpha, \beta, \gamma)$, které říkají, jak přesně leží bod průsečíku uvnitř trojúhelníku (platí $\alpha + \beta + \gamma = 1$). Díky tomu umím z vrcholových hodnot dopočítat hodnotu přímo v bodě průsečíku jako „vážený průměr“ vrcholů.
+Výsledkem renderování pro pixel $p$ je trojúhelník na SMPL síťovině, do kterého paprsek narazil. Trojúhelník popíšu třemi indexy vrcholů $(i, j, k)$. Zároveň dostanu barycentrické váhy $(\lambda_1, \lambda_2, \lambda_3)$ přiřazené vrcholům $(i, j, k)$; platí $\lambda_1 + \lambda_2 + \lambda_3 = 1$. Díky tomu umím z vrcholových hodnot dopočítat hodnotu přímo v bodě průsečíku jako „vážený průměr“ vrcholů.
 
 DensePose CSE má důležitou vlastnost: pro SMPL vrcholy existuje také předpočítaná tabulka embeddingů. Označím ji jako $\mathbf{v}_i \in \mathbb{R}^D$, kde $i$ je index vrcholu SMPL. Pro pixel $p$ pak spočtu embedding bodu na povrchu SMPL, který je v daném pixelu vidět, jako
 \[
-\tilde{\mathbf{e}}_p = \alpha\,\mathbf{v}_i + \beta\,\mathbf{v}j + \gamma\,\mathbf{v}k.
+\tilde{\mathbf{e}}_p = \lambda_1\,\mathbf{v}_i + \lambda_2\,\mathbf{v}_j + \lambda_3\,\mathbf{v}_k.
 \]
 Tím mám dvě porovnatelné věci: DensePose embedding $\mathbf{e}_p$ (z obrázku) a „SMPL embedding“ $\tilde{\mathbf{e}}_p$ (z vyrenderované síťoviny).
 Ztrátovou funkci (loss) pak chci definovat tak, aby byla malá, když oba embeddingy odpovídají stejnému místu na těle. V praxi se embeddingy často normalizují na jednotkovou délku (L2-normalizace), a potom se podobnost měří kosinovou podobností, což je skalární součin:
@@ -290,17 +298,11 @@ Ztrátovou funkci (loss) pak chci definovat tak, aby byla malá, když oba embed
 \]
 kde $\hat{\mathbf{a}}$ je vektor $\mathbf{a}$ po normalizaci (má délku 1). Skvělé na tom je, že hodnota je blízko 1, když vektory míří „stejným směrem“ (tedy jsou si podobné), a menší, když si podobné nejsou. Ztrátu tedy mohu napsat například jako
 \[
-\mathcal{L}{\text{CSE}} = \sum{p \in S} \bigl(1 - \langle \hat{\mathbf{e}}_p, \widehat{\tilde{\mathbf{e}}}_p \rangle \bigr).
+\mathcal{L}_{\text{CSE}} = \sum_{p \in S} \bigl(1 - \langle \hat{\mathbf{e}}_p, \widehat{\tilde{\mathbf{e}}}_p \rangle \bigr).
 \]
 
-Význam symbolů:
-- $S$ je množina pixelů, které DensePose označilo jako tělo.
-- $p$ je jeden konkrétní pixel z této množiny.
-- $\mathbf{e}_p$ je embedding z DensePose pro pixel $p$.
-- $\tilde{\mathbf{e}}_p$ je embedding, který jsem získal z aktuálního SMPL odhadu renderováním a interpolací.
-- $\langle \cdot, \cdot \rangle$ je skalární součin (po normalizaci odpovídá kosinové podobnosti).
-- výraz $(1 - \text{podobnost})$ je malý, když se embeddingy shodují.
-Optimalizace pak probíhá stejně jako u běžného fittingu SMPL: měním parametry SMPL tak, aby se minimalizovala ztráta. Prakticky jde o globální rotaci a posun těla vůči kameře, parametry pózy $\theta$ (ohyby kloubů) a parametry tvaru $\beta$ (tělesné proporce). Cíl je, aby při renderování SMPL vycházelo pro každý pixel „stejné místo na těle“, jaké predikuje DensePose.
+Použité značení navazuje na úvod kapitoly; $\tilde{\mathbf{e}}_p$ označuje embedding bodu na povrchu SMPL viditelného v pixelu $p$.
+Optimalizace pak probíhá stejně jako u běžného fittingu SMPL: měním parametry SMPL tak, aby se minimalizovala ztráta. Prakticky jde o globální rotaci a posun těla vůči kameře, parametry pózy $\theta$ a parametry tvaru $\beta$. Cíl je, aby při renderování SMPL vycházelo pro každý pixel „stejné místo na těle“, jaké predikuje DensePose.
 
 Hlavní očekávaný přínos je v tom, že SMPL funguje jako humanoidní omezení: DensePose může lokálně „šumět“ (nespojitosti, přeskakování mezi částmi těla, záměna levé a pravé strany), ale SMPL vždy musí zůstat jedna konzistentní lidská síťovina s realistickými proporcemi. Fitting tak může DensePose využít jako hustý signál, ale zároveň chyby „vyhladit“ tím, že nejlepší řešení musí být globálně lidské. Vedlejším přínosem je, že výsledkem není jen sada 2D bodů, ale rovnou 3D model těla, ze kterého lze odvodit klouby i prostorovou pózu.
 
@@ -341,35 +343,19 @@ Proto jsem tuto variantu vyhodnotil jako slepou uličku a přešel jsem k jednod
 
  Následující metoda \code{Euklidovský fitter} vznikla jako zjednodušená varianta předchozího prototypu. Kompletní implementace je v souboru \code{projects/euclidean_fitter.py}; v \code{common/utils.py} pak zůstaly pomocné funkce pro práci s projekcí a výpočtem ztráty.
 
-\section{Euklidovský fitter}
+\section{Euklidovský fitter: loss v obrazové rovině}
 
 \subsection{Návrh metody}
 
 V předchozí metodě jsem porovnával DensePose embeddingy se „stejnými“ embeddingy na povrchu SMPL, což si ale vyžádalo explicitní řešení viditelnosti (ray tracing) a vedlo to k nestabilní optimalizaci. Zde proto volím jednodušší pohled: DensePose použiji pouze k vytvoření 2D korespondencí mezi pixely a vrcholy SMPL a samotnou ztrátu budu měřit přímo v obrazové rovině euklidovskou vzdáleností.
 
-DensePose v2 (CSE) mi pro každý pixel postavy dává embedding $\mathbf{e}_p$ a zároveň masku $S$ (pixely, které patří tělu). Protože pro SMPL vrcholy existují předpočítané embeddingy $\mathbf{v}_i$, mohu pro každý pixel $p \in S$ vybrat nejbližší vrchol (podle kosinové podobnosti, tj. skalárního součinu normalizovaných embeddingů)
+DensePose CSE mi pro každý pixel postavy dává embedding $\mathbf{e}_p$ a zároveň masku $S$. Protože pro SMPL vrcholy existují předpočítané embeddingy $\mathbf{v}_i$, mohu pro každý pixel $p \in S$ vybrat nejbližší vrchol (podle kosinové podobnosti, tj. skalárního součinu normalizovaných embeddingů)
 \[
-I(p) = \arg\max \langle \hat{\mathbf{e}}_p, \hat{\mathbf{v}}_i \rangle,
+I(p) = \arg\max_i \langle \hat{\mathbf{e}}_p, \hat{\mathbf{v}}_i \rangle,
 \]
-kde $I(p)$ je index vrcholu SMPL, který DensePose pixelu $p$ přiřazuje. Tím se z DensePose výstupu stane množina 2D bodů s identitou vrcholu: pro každý pixel známe jeho souřadnice $\mathbf{u}_p \in \mathbb{R}^2$ (v souřadnicích bounding boxu) a příslušný index $I(p)$.
+kde $I(p)$ je index vrcholu SMPL, který DensePose pixelu $p$ přiřazuje. Tím se z DensePose výstupu stane množina 2D bodů s identitou vrcholu: pro každý pixel známe jeho souřadnice $\mathbf{u}_p$ (v souřadnicích bounding boxu) a příslušný index $I(p)$.
 
-Pro čitelnost doplním význam symbolů, které v této části používám:
-\begin{itemize}
-    \item $S$ -- maska postavy: pixely, které DensePose označí jako tělo.
-    \item $p$ -- konkrétní pixel z masky $S$.
-    \item $\mathbf{e}_p$ -- DensePose embedding pixelu $p$.
-    \item $i$ -- index vrcholu SMPL (vrcholy si lze představit jako body sítě povrchu těla).
-    \item $\mathbf{v}_i$ -- předpočítaný embedding vrcholu $i$.
-    \item $\hat{\mathbf{e}}$ -- normalizovaný embedding (vektor s délkou 1); díky tomu je skalární součin $\langle \cdot, \cdot \rangle$ ekvivalentní kosinové podobnosti.
-    \item $\arg\max$ -- operace \enquote{vyber index, pro který je výraz největší} (zde tedy nejpodobnější vrchol).
-    \item $I(p)$ -- index vrcholu, který DensePose pixelu $p$ přiřadí (vybere se ten nejpodobnější podle embeddingu).
-    \item $\mathbf{u}_p$ -- 2D souřadnice pixelu $p$ v rámci bounding boxu (tj. dvojice $(x,y)$ v pixelech).
-    \item $V$ -- množina vrcholů SMPL, které v daném kroku porovnávám (typicky všechny vrcholy, nebo jen vybraná část těla).
-    \item $\mathbf{x}_i$ -- 2D souřadnice, kam se v obraze promítne vrchol $i$ z aktuálního odhadu SMPL.
-    \item $P_i$ -- množina pixelů, které DensePose přiřadilo vrcholu $i$.
-    \item $|P_i|$ -- počet pixelů v množině $P_i$.
-    \item $V^{*}$ -- vrcholy z $V$, které mají aspoň jednu korespondenci v DensePose (tj. $|P_i|>0$).
-\end{itemize}
+Použité značení navazuje na úvod kapitoly.
 
 Na druhé straně mám v každé iteraci optimalizace aktuální SMPL síťovinu. Pro vybranou množinu vrcholů $V$ jejich 3D souřadnice promítnu do obrazu a dostanu 2D body $\mathbf{x}_i \in \mathbb{R}^2$.
 
@@ -459,38 +445,27 @@ Celkově tato metoda splnila hlavní cíl, který jsem od ní očekával: oproti
 
 Zároveň zde stále platí, že se všemi korespondencemi zacházím stejně: vrchol, který DensePose přiřadí velmi konzistentně, má stejnou „váhu“ jako vrchol, který je v masce rozhozený po více místech. Právě snaha odlišit stabilní korespondence od zjevně problematických mě přivedla k následující metodě \code{Precizní fitter}.
 
-\section{Precizní fitter}
+\section{Precizní fitter: vážení korespondencí podle konzistence (prototyp)}
 
-\subsection{Návrh metody}
+\subsection{Motivace a hypotéza}
 
 Precizní fitter je pokus o řešení hlavního nedostatku předchozí metody: v okamžiku, kdy DensePose udělá zásadní chybu v korespondencích (např. označí obě nohy jako levou), dostává optimalizace protichůdné informace a \enquote{neví}, kam danou končetinu napasovat. To je dobře vidět i na případech typu Obrázku~\ref{fig:method-2-difficult-scene}, kde špatné korespondence vedou fitting do nelidského lokálního minima.
 
-Základní hypotéza této metody je, že ne všechny DensePose korespondence jsou stejně důvěryhodné, a že část šumu lze odfiltrovat ještě před samotným fittingem. Zjednodušeně: pokud DensePose přiřazuje jeden SMPL vrchol „na více místech najednou“, je to podezřelé. Zavádím proto pojem \emph{přesnost bodu} jako míru toho, jak moc jsou pixely s totožným vrcholovým indexem v obraze rozptýlené.
+Základní hypotéza je, že ne všechny DensePose korespondence jsou stejně důvěryhodné, a že část šumu lze odfiltrovat ještě před samotným fittingem. Zjednodušeně: pokud DensePose přiřazuje jeden SMPL vrchol „na více místech najednou“, je to podezřelé. Proto zavádím jednoduchou míru konzistence korespondence odvozenou z toho, jak moc jsou pixely se stejným vrcholovým indexem v obraze rozptýlené.
 
-Nejprve z DensePose embeddingů vytvořím mapu $I(p)$ stejně jako v euklidovském fitteru: pro každý pixel $p$ v masce postavy $S$ vyberu index vrcholu $i$ na SMPL, jehož předpočítaný embedding je k embeddingu pixelu nejbližší. Tím DensePose každému pixelu přiřadí „identitu“ vrcholu.
+\subsection{Návrh: vážená ztrátová funkce}
 
-Pro čitelnost uvádím význam symbolů, které v této podsekci používám:
-\begin{itemize}
-    \item $S$ -- množina pixelů (maska), které DensePose označí jako tělo v rámci bounding boxu.
-    \item $p$ -- konkrétní pixel z masky $S$.
-    \item $I(p)$ -- index vrcholu SMPL, který DensePose pixelu $p$ přiřadí.
-    \item $i$ -- index vrcholu SMPL (typicky $0\dots 6889$).
-    \item $P_i$ -- všechny pixely, které DensePose přiřadilo vrcholu $i$.
-    \item $|P_i|$ -- počet takových pixelů (kolikrát se vrchol $i$ „vyskytl“ v masce).
-    \item $\mathbf{u}_p$ -- 2D souřadnice pixelu $p$ v rámci bounding boxu (tj. dvojice $(x,y)$ v pixelech).
-    \item $\boldsymbol{\mu}_i$ -- průměrná 2D pozice pixelů z $P_i$ (střed jejich „shluku“).
-    \item $\sigma_i$ -- rozptyl pixelů z $P_i$ okolo středu $\boldsymbol{\mu}_i$ (menší je lepší).
-    \item $\mathbf{x}_i$ -- projekce vrcholu $i$ z aktuálního SMPL odhadu do obrazu (do stejné soustavy jako $\mathbf{u}_p$).
-    \item $w_i$ -- váha (důvěryhodnost) vrcholu $i$, odvozená z $\sigma_i$.
-\end{itemize}
+Nejprve z DensePose embeddingů vytvořím mapu $I(p)$ stejně jako v euklidovském fitteru: pro každý pixel $p$ v masce postavy $S$ vyberu index vrcholu $i$ na SMPL, jehož předpočítaný embedding je k embeddingu pixelu nejbližší.
 
-Formálně tedy pro každý vrchol $i$ sesbírám pixely
+Značení $S$, $I(p)$, $P_i$, $\mathbf{u}_p$ a $\mathbf{x}_i$ navazuje na úvod kapitoly. Nově zavádím střed shluku pixelů $\boldsymbol{\mu}_i$, jeho rozptyl $\sigma_i$ a z něj odvozenou váhu $w_i$.
+
+Pro každý vrchol $i$ sesbírám pixely
 \[
 P_i = \{p \in S\;|\; I(p)=i\}.
 \]
 Pokud DensePose mapuje konzistentně, pak by pixely z $P_i$ měly tvořit malou, souvislou oblast. Naopak při chybách typu prohození končetin, \enquote{lupínků} a šumu na hranách masky se stejný index $i$ začne objevovat na více nesouvisejících místech a $P_i$ bude rozptýlené.
 
-Přesnost bodu měřím přes střed $\boldsymbol{\mu}_i$ a rozptyl $\sigma_i$:
+Konzistenci měřím přes střed $\boldsymbol{\mu}_i$ a rozptyl $\sigma_i$:
 \[
 \boldsymbol{\mu}_i = \frac{1}{|P_i|}\sum_{p\in P_i} \mathbf{u}_p,
 \qquad
@@ -498,48 +473,40 @@ Přesnost bodu měřím přes střed $\boldsymbol{\mu}_i$ a rozptyl $\sigma_i$:
 \]
 Značení $\lVert \cdot \rVert$ zde znamená běžnou euklidovskou vzdálenost v pixelech. Prakticky tedy počítám: „vezmi všechny pixely patřící vrcholu $i$, najdi jejich střed a spočti průměrnou vzdálenost od středu“.
 
-Z rozptylu $\sigma_i$ pak odvodím váhu $w_i$ tak, aby platilo: čím větší rozptyl, tím menší váha (menší důvěra). Jednoduchá, hladká volba je
+Z rozptylu $\sigma_i$ odvodím váhu $w_i$ tak, aby platilo: čím větší rozptyl, tím menší váha (menší důvěra). Jednoduchá, hladká volba je
 \[
 w_i = \begin{cases}
 \exp\!\left(-\left(\frac{\sigma_i}{\tau}\right)^2\right), & |P_i|\ge c_{\min},\\
-0, & \text{jinak},
+0, & \text{jinak}.
 \end{cases}
 \]
-kde $\tau$ určuje, jak rychle váha klesá, a $c_{\min}$ potlačí vrcholy, které se v masce objeví jen několikrát (u nich je rozptyl málo vypovídající).
+Zde $\tau$ určuje, jak rychle váha klesá, a $c_{\min}$ potlačí vrcholy, které se v masce objeví jen několikrát (u nich je rozptyl málo vypovídající).
 
-Váhy následně použiji buď k výběru \emph{nejpřesnějších bodů} (např. top-$k$ podle $w_i$), nebo přímo ve vážené verzi ztrátové funkce. Ztrátu budu (stejně jako v euklidovském fitteru) počítat v obrazové rovině, ale příspěvek každého vrcholu zvážím:
+Ztrátu pak počítám v obrazové rovině stejně jako u euklidovského fitteru, ale příspěvky vrcholů vážím:
 \[
 \mathcal{L}_{\text{PREC}} = \frac{1}{\sum_{i\in V^{*}} w_i}\sum_{i\in V^{*}} w_i \min_{p\in P_i} \lVert \mathbf{x}_i - \mathbf{u}_p \rVert.
 \]
-Zde $V^{*}$ označuje vrcholy, které se v dané detekci vůbec objevily (tj. mají $|P_i|>0$). Výraz $\min_{p\in P_i}$ znamená, že pokud DensePose přiřadí vrcholu $i$ více pixelů, beru z nich ten, který je projekci $\mathbf{x}_i$ nejblíže. Dělení součtem vah $\sum_{i\in V^{*}} w_i$ je pouze normalizace: ztráta pak zůstává ve srovnatelné škále i v případech, kdy se mezi snímky liší počet použitých vrcholů.
+Zde $V^{*}$ označuje vrcholy, které se v dané detekci vůbec objevily (tj. mají $|P_i|>0$). Výraz $\min_{p\in P_i}$ znamená, že pokud DensePose přiřadí vrcholu $i$ více pixelů, beru z nich ten, který je projekci $\mathbf{x}_i$ nejblíže. Dělení součtem vah je normalizace, aby ztráta zůstala ve srovnatelné škále i mezi snímky s různým počtem použitých vrcholů.
 
-Intuice zůstává stejná: SMPL se nejdříve \enquote{chytí} stabilních částí (typicky torso) a nekonzistentní korespondence na končetinách přestanou optimalizaci dominovat; zbytek pózy pak musí vyplynout z humanoidních omezení SMPL a regularizace.
+\subsection{Implementovaný prototyp: analýza konzistence korespondencí}
 
-\subsection{Postup implementace}
+Než jsem metodu napojil na samotný fitting, chtěl jsem ověřit dvě praktické otázky: (1) na kterých částech těla jsou DensePose korespondence nejstabilnější (mají nejmenší rozptyl) a (2) zda jsou \,\enquote{přesné body}\, rozptýlené po celém těle tak, aby mohly tvořit dostatečnou oporu pro rekonstrukci celé pózy.
 
-Než jsem metodu napojil na samotný fitting, chtěl jsem ověřit dvě praktické otázky:
-\begin{enumerate}
-    \item Na kterých částech těla jsou DensePose korespondence nejstabilnější (mají nejmenší rozptyl)?
-    \item Zda jsou \emph{přesné body} rozptýlené po celém těle tak, aby mohly tvořit dostatečnou oporu pro rekonstrukci celé pózy?
-\end{enumerate}
+Tento krok jsem implementoval jako samostatnou analýzu v souboru \code{projects/precission_fitter.py}. Skript prochází anotace z COCO DensePose (minival), pro vybrané osoby spustí DensePose CSE a pro každý pixel v masce $S$ určí nejbližší vrchol $I(p)$ pomocí funkce \code{get_closest_vertices_mask_from_ES}. Následně pro každý vrchol $i$ spočtu $|P_i|$, průměrnou pozici $\boldsymbol{\mu}_i$ a rozptyl $\sigma_i$.
 
- Tento krok jsem implementoval jako samostatnou analýzu v souboru \code{projects/precission_fitter.py}. Skript prochází anotace z COCO DensePose (minival), pro vybrané osoby spustí DensePose v2 (CSE) a pro každý pixel v masce $S$ určí nejbližší vrchol $I(p)$ pomocí funkce \code{get_closest_vertices_mask_from_ES}. Následně pro každý vrchol $i$ spočtu $|P_i|$, průměrnou pozici $\boldsymbol{\mu}_i$ a rozptyl $\sigma_i$.
+Výpočet rozptylu je v prototypu plně vektorizovaný v PyTorch a běží na GPU. Využívám \code{torch.bincount} k tomu, abych pro každý index $i$ získal (1) počet přiřazení, (2) součet $x$ a $y$ souřadnic a (3) součet kvadratických odchylek od průměru, ze kterého vyjde směrodatná odchylka. Výsledky ukládám jako diagnostické vizualizace: (a) překryv DensePose mapování v obraze a (b) 3D vizualizaci SMPL síťoviny, kde jsou vrcholy obarvené podle $\sigma_i$. To mi umožňuje rychle zjistit, zda se nízký rozptyl objevuje jen na malé části těla, nebo zda je tato informace použitelná pro fitting jako celek.
 
-Výpočet rozptylu je v prototypu plně vektorizovaný v PyTorch a běží na GPU. Využívám \code{torch.bincount} k tomu, abych pro každý index $i$ získal (1) počet přiřazení, (2) součet $x$ a $y$ souřadnic a (3) součet kvadratických odchylek od průměru, ze kterého vyjde směrodatná odchylka. Výsledky ukládám jako diagnostické vizualizace: (a) překryv DensePose mapování v obraze a (b) 3D vizualizaci SMPL síťoviny, kde jsou vrcholy obarvené podle $\sigma_i$. To mi umožňuje rychle zjistit, zda se \enquote{nízký rozptyl} objevuje jen na malé části těla, nebo zda je tato informace použitelná pro fitting jako celek.
+V této fázi jsem také uvažoval o normalizaci měřítka (protože $\sigma_i$ je v pixelech a bez škálování závisí na velikosti bounding boxu). V kódu je tento směr naznačen konstantou \code{LOSS_AREA}, nicméně plné napojení na zbytek pipeline (volba normalizace, prahování $|P_i|$ a definice vah $w_i$) jsem už do odevzdání nestihl.
 
-V této fázi jsem také uvažoval o zvýšení rozlišení, do kterého DensePose výstup přepisuji (resp. o normalizaci měřítka bounding boxu), protože $\sigma_i$ je v pixelech a bez škálování závisí na velikosti detekce. V kódu je tento směr naznačen konstantou \code{LOSS_AREA}, nicméně plné napojení na zbytek pipeline (volba normalizace, prahování $|P_i|$ a definice vah $w_i$) jsem už do odevzdání nestihl.
+Je důležité zdůraznit, že \code{projects/precission_fitter.py} proto není \enquote{hotový fitter} v tom smyslu, že by optimalizoval parametry SMPL. Jde o prototyp pro měření a vizualizaci stability DensePose korespondencí, který měl sloužit jako podklad pro finální implementaci vážené ztráty.
 
-Je důležité zdůraznit, že \code{projects/precission_fitter.py} proto není \enquote{hotový fitter} v tom smyslu, že by optimalizoval parametry SMPL. Jde o rozpracovaný prototyp pro měření a vizualizaci stability DensePose korespondencí, který měl sloužit jako podklad pro finální implementaci vážené ztráty.
+\subsection{Omezení a plán integrace do fittingu}
 
-\subsection{Diskuse}
+Očekávaný přínos této metody je vyšší robustnost vůči typickým chybám DensePose. Euklidovský fitter pracuje s korespondencemi $I(p)$ jako s fakty; precizní fitter se je naopak snaží doplnit o jednoduchý odhad důvěryhodnosti. Pokud rozptyl opravdu koreluje se správností, pak vážením snížím vliv nekonzistentních částí, které jinak optimalizaci tlačí do špatných řešení.
 
-Očekávaný přínos této metody je vyšší robustnost vůči typickým chybám DensePose. Euklidovský fitter pracuje s korespondencemi $I(p)$ jako s fakty; precizní fitter se je naopak snaží doplnit o jednoduchý odhad důvěryhodnosti. Pokud rozptyl opravdu koreluje se správností, pak vážením (nebo výběrem pouze nejpřesnějších bodů) snížím vliv nekonzistentních částí, které jinak optimalizaci tlačí do špatných řešení.
+Současně jde o metodu s jasnými riziky. Nízký rozptyl nemusí znamenat, že je korespondence správná --- může jít i o konzistentní, ale systematicky špatné mapování. Rozptyl je nespolehlivý pro vrcholy s malým počtem pixelů ($|P_i|$) a bez normalizace je závislý na velikosti detekce. Hrozí také, že \enquote{nejstabilnější} body budou koncentrované jen na torzu a póza končetin zůstane podurčená; v takovém případě je potřeba kombinovat vážení s dalšími omezeními (regularizace, nebo podmínka pokrytí více částí těla).
 
-Současně jde o metodu s jasnými riziky. Nízký rozptyl nemusí znamenat, že je korespondence správná --- může jít i o konzistentní, ale systematicky špatné mapování. Rozptyl je navíc nespolehlivý pro vrcholy s malým počtem pixelů ($|P_i|$) a bez normalizace je závislý na velikosti bounding boxu. Hrozí také, že \enquote{nejpřesnější} body budou koncentrované jen na torzu, a póza končetin zůstane podurčená; v takovém případě by bylo potřeba doplnit výběr o podmínku pokrytí více částí těla nebo kombinovat váhy s dalšími regularizačními členy.
-
-I přes nedokončený stav považuji za důležité tuto metodu i zdrojový kód sdílet. Tato práce je záměrně explorativní a je postavená na principu Fail-Fast: cílem není prezentovat pouze \enquote{hotové} výsledky, ale také transparentně zdokumentovat slibné směry a důvody, proč se je nepodařilo dotáhnout v rámci časového rozsahu maturitní práce. Soubor \code{projects/precission_fitter.py} zachycuje klíčový krok této myšlenky (definici a výpočet rozptylu $\sigma_i$ a jeho vizualizaci) a poskytuje konkrétní výchozí bod pro budoucí navázání.
-
-Jako přirozené pokračování bych nejprve ověřil samotnou hypotézu kvantitativně: na anotovaných datech porovnat $\sigma_i$ se skutečnou chybovostí přiřazení vrcholů (DensePose dataset obsahuje i anotace na úrovni vrcholů) a určit rozumné prahy a tvar váhové funkce. Teprve potom dává smysl váhy $w_i$ integrovat do fittingu a porovnat úspěšnost a stabilitu optimalizace vůči euklidovskému fitteru.
+Jako přirozené pokračování bych nejprve ověřil samotnou hypotézu kvantitativně: na anotovaných datech porovnat $\sigma_i$ se skutečnou chybovostí přiřazení vrcholů a určit rozumné prahy a tvar váhové funkce. Teprve potom dává smysl váhy $w_i$ integrovat do fittingu (např. jako váženou verzi euklidovské ztráty) a porovnat stabilitu optimalizace vůči euklidovskému fitteru.
 
 
 
@@ -741,9 +708,7 @@ Tento repozitář není benchmarkovací nástroj a cílem je spíše rychlé ite
 
 Zároveň platí, že COCO, DensePose a SMPL mají vlastní licence a nejsou v repozitáři redistribuovány; při sdílení výsledků je potřeba tyto podmínky respektovat.
 
-\chapter*{Závěr}
-\pagestyle{empty}
-\addcontentsline{toc}{chapter}{Závěr}
+\chapter{Závěr}
 
 Tato maturitní práce se zabývala možnostmi, jak zlepšit odhad lidské pózy v reálných scénách pomocí kombinace DensePose a parametrického modelu SMPL. DensePose poskytuje hustou korespondenci pixelů na povrch těla, ale jeho výstup je zatížen šumem a typickými chybami (např. záměna levé a pravé strany). SMPL naopak přináší silné humanoidní omezení. Zvolil jsem proto explorativní postup postavený na principu Fail-Fast: rychle navrhnout hypotézu, ověřit ji prototypem a z výsledků (včetně neúspěchů) vyvodit další směr.
 
