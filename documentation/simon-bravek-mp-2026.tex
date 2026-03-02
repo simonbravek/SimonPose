@@ -60,20 +60,46 @@ The methodology is exploratory and follows a Fail-Fast approach: quickly formula
 \setcounter{tocdepth}{2}
 \tableofcontents
 
-\chapter*{Slovník pojmů}
-\addcontentsline{toc}{chapter}{Slovník pojmů}
+\chapter*{Seznam zkratek a pojmů}
+\addcontentsline{toc}{chapter}{Seznam zkratek a pojmů}
 
-\textbf{model} naučená neuronová síť, podrobněji v teoretické části
+Následující zkratky a pojmy používám ve významu uvedeném zde. Uvedené definice jsou záměrně stručné a odpovídají kontextu této práce.
 
-\textbf{segmentace} (segmentation) rozdělení obrázku na skupiny pixelů, typicky dle objektů, které popisují. v kontextu této práce tím referuji ke skupině pixelů patřící detekovanému lidskému tělu.
+\section*{Zkratky}
+\begin{description}[style=nextline]
+    \item[CSE] (Continuous Surface Embeddings) DensePose v2 výstup, který přiřazuje pixelům embedding reprezentující místo na povrchu těla.
+    \item[SMPL / SMPL-X] Parametrické 3D modely těla; SMPL-X rozšiřuje SMPL (o ruce a obličej).
+    \item[SOTA] (State-of-the-Art) nejlepší dosud známé výsledky / aktuálně nejpokročilejší přístup.
+\end{description}
 
-\textbf{bounding box} je nejmenší obdélník obsahující celou segmentaci nějakého objektu, typicky se značí pomocí dvou bodů (levého horního rohu a pravého dolního rohu)
-
-\textbf{detekce} (detection) je objekt zaznamenaný modelem, typicky pomocí bounding boxu
-
-\textbf{maska} (mask) výsledek segmentace, je to černo-bílý obraz stejné velikosti jako originál překrývající segmentaci objektu, může být i binární maskou, kde k pixely patřící k objektu mají hodnotu 1 a ostatní hodnoty 0
-
-\textbf{embedding} je vektorové pole zachycující význam obrázku, více v teoretické části
+\section*{Pojmy}
+\begin{description}[style=nextline]
+    \item[anotace] Ručně (nebo poloautomaticky) připravené \,\enquote{správné} popisky dat (např. masky, klíčové body) používané pro trénování a vyhodnocení.
+    \item[bounding box] (bbox) Obdélník ohraničující detekovaný objekt v obraze.
+    \item[confidence] Skóre důvěry detekce; slouží k filtrování výstupů modelu.
+    \item[dataset] Sada dat (typicky obrázků) s anotacemi; trénovací dataset slouží k učení, validační/testovací k vyhodnocení.
+    \item[detekce] Výsledek modelu pro konkrétní objekt (např. jedna osoba), často spolu se skóre důvěry.
+    \item[DensePose] Metoda pro husté mapování pixelů osoby na kanonický povrch těla (pixel-to-surface korespondence).
+    \item[Detectron2] Open-source framework (Meta) pro detekci a segmentaci; DensePose je na něm postavený.
+    \item[embedding] Naučená vektorová reprezentace; v této práci zejména embedding pixelu z DensePose CSE, který reprezentuje místo na povrchu těla.
+    \item[Fail-Fast] Iterativní přístup \,\enquote{rychle ověřuj hypotézy}: navrhnout, prototypovat, vyhodnotit a poučit se i z neúspěchů.
+    \item[fitting] Nalezení parametrů (zde SMPL) tak, aby projekce/rekonstrukce co nejlépe odpovídala pozorovaným datům; typicky řešeno optimalizací ztrátové funkce.
+    \item[holistický model] Model, který přímo odhaduje \,\enquote{hotovou} reprezentaci (např. SMPL parametry) bez explicitní optimalizace v dalším kroku.
+    \item[intrinsics] Vnitřní parametry kamery (maticí $K$), které popisují projekci 3D bodů do obrazové roviny.
+    \item[in-the-wild] Data mimo laboratorní podmínky: různá světla, pozadí, zákryty, různé kamery, více osob v záběru apod.
+    \item[instance segmentace] Segmentace po jednotlivých instancích (osobách); výstupem je typicky maska pro každou osobu zvlášť.
+    \item[L2-normalizace] Normalizace vektoru na jednotkovou délku podle euklidovské normy.
+    \item[loss / ztrátová funkce] Skalární funkce, kterou optimalizace minimalizuje; vyjadřuje \,\enquote{neshodu} mezi modelem a daty.
+    \item[maska] Binární (případně vícetřídní) obraz určující, které pixely patří objektu.
+    \item[mesh / síťovina] Trojúhelníková síť popisující povrch 3D objektu.
+    \item[optimalizátor Adam] Běžně používaný gradientní optimalizační algoritmus pro minimalizaci loss.
+    \item[PyTorch] Framework pro hluboké učení a práci s tenzory; zde použit pro trénované modely i optimalizaci.
+    \item[ray tracing] Výpočet viditelnosti a průsečíků paprsků se 3D geometrií; zde pro určení viditelné části SMPL síťoviny.
+    \item[renderování] Zobrazení 3D modelu do 2D obrazu pomocí projekce a rasterizace.
+    \item[segmentace] Rozdělení obrazu na oblasti (pixely) patřící k objektům; v této práci zejména segmentace lidského těla.
+    \item[SMPL parametry $\theta$, $\beta$] $\theta$ popisuje pózu (rotace kloubů), $\beta$ tvar (tělesné proporce).
+    \item[vrchol (vertex)] Jeden bod síťoviny; SMPL má pevný počet vrcholů a jejich spojení do trojúhelníků.
+\end{description}
 
 \chapter{Úvod}
 
@@ -89,14 +115,7 @@ Právě rozmanitost této disciplíny, její užitečnost a také možnost setka
 
 \section{Problematika}
 
-Současné SOTA (State-of-the-Art) modely sice dosahují vynikajících výsledků na laboratorních datasetech, ale často selhávají v reálných podmínkách (in-the-wild). Mezi kritické faktory patří:
-
-\begin{itemize}
-    \item \textbf{Zákryty (Occlusions):} Části těla zakryté předměty nebo jinými částmi těla.
-    \item \textbf{Perspektivní zkreslení:} Extrémní úhly kamery, které deformují vizuální proporce těla.
-    \item \textbf{Vizuální šum:} Volné oblečení nebo špatné světelné podmínky.
-    \item \textbf{Propletení více těl:} Situace v davu, kde není jasné, komu patří jaká část těla a jak je správně rozdělit. 
-\end{itemize}
+Současné state-of-the-art (SOTA) modely sice dosahují vynikajících výsledků na laboratorních datasetech, ale v reálných scénách (in-the-wild) jejich přesnost často výrazně klesá. Typicky se projevují zákryty, perspektivní zkreslení, vizuální šum a situace s více lidmi v záběru; podrobněji je rozebírám v teoretické části (viz \ref{sec:problematika-in-the-wild}).
 
 Právě kombinace modelu SMPL s technologií DensePose (která mapuje pixely přímo na povrch těla) nabízí unikátní cestu, jak tyto problémy řešit skrze hustou korespondenci dat.
 
@@ -116,7 +135,7 @@ Výsledkem práce je ucelený přehled vyzkoušených metod, jejich kritické zh
 
 \section{Struktura práce}
 
-Teoretická část shrnuje klíčové pojmy a principy použitých metod (DensePose a parametrický model SMPL) a motivuje, proč jejich kombinace dává smysl pro robustnější odhad pózy v reálných scénách. Praktická část popisuje tři zkoušené varianty fittingu SMPL do signálu z DensePose, včetně implementačních kompromisů a zhodnocení. Technická dokumentace slouží jako praktický návod k instalaci a reprodukci experimentů v repozitáři SimonPose. Závěr stručně shrnuje dosažené výsledky, limity a možné směry pokračování.
+Na začátku práce uvádím seznam zkratek a pojmů, který sjednocuje používanou terminologii. Teoretická část shrnuje klíčové pojmy a principy použitých metod (DensePose a parametrický model SMPL) a motivuje, proč jejich kombinace dává smysl pro robustnější odhad pózy v reálných scénách. Praktická část popisuje tři zkoušené varianty fittingu SMPL do signálu z DensePose, včetně implementačních kompromisů a zhodnocení. Technická dokumentace slouží jako praktický návod k instalaci a reprodukci experimentů v repozitáři SimonPose. Závěr stručně shrnuje dosažené výsledky, limity a možné směry pokračování.
 
 \chapter{Teoretická část}
 \pagestyle{fancy}
@@ -134,24 +153,31 @@ Dále zvolíme metodu pro výpočet chyby výstupu (loss). Proces generování v
 Když v počítačovém vidění mluvím o \enquote{detekci}, nemusí tím být myšlen pouze rámeček kolem objektu. Model může výstupem popsat jak samotnou polohu objektu, tak i jeho tvar, strukturu nebo konkrétní body. Pro úlohy, které souvisí s člověkem (a se kterými se v této práci setkávám), jsou nejčastější zejména tyto typy detekce:
 
 \begin{itemize}
-    \item \textbf{Bounding box:} nejmenší obdélník, který postavu ohraničí. Je výpočetně levný a často slouží jako první krok, který zúží oblast zájmu pro další analýzu.
-    \item \textbf{Instance segmentace (maska):} pixelová reprezentace siluety člověka pro každou osobu zvlášť. Oproti rámečku zachycuje přesnější tvar a lépe funguje v přítomnosti zákrytů.
-    \item \textbf{2D klíčové body (keypoints):} sada anatomických bodů (např. ramena, lokty, kolena), které tvoří \enquote{kostru} pózy. Jde o řídkou reprezentaci, která je rychlá a interpretovatelná, ale ztrácí informaci o objemu těla.
-    \item \textbf{Hustá korespondence (DensePose):} přiřazení pixelů na postavě ke kanonickému povrchu těla. Tento výstup poskytuje výrazně bohatší signál než samotné klíčové body a tvoří základ metod, které v této práci zkouším.
+    \item \textbf{Bounding box:} hrubé ohraničení osoby; výpočetně levné a často slouží jako první krok, který zúží oblast zájmu pro další analýzu.
+    \item \textbf{Instance segmentace (maska):} přesný tvar osoby po pixelech; oproti rámečku lépe funguje v přítomnosti zákrytů.
+    \item \textbf{2D klíčové body (keypoints):} řídká \enquote{kostra} z anatomických bodů; rychlá a interpretovatelná, ale bez informace o objemu těla.
+    \item \textbf{DensePose:} husté mapování pixelů na kanonický povrch těla; bohatý signál využitelný pro fitting SMPL.
 \end{itemize}
 
-V praxi bývá detekce doplněna i skóre důvěry (confidence), podle kterého lze výsledky filtrovat. Volba typu detekce pak přímo určuje, jaké metriky kvality dávají smysl (např. IoU pro masky, nebo průměrnou chybu bodů pro keypoints) a jaké další kroky jsou vůbec možné.
+V praxi bývá detekce doplněna i skóre důvěry (confidence), podle kterého lze výsledky filtrovat. Volba typu detekce pak přímo určuje, jaké metriky kvality dávají smysl a jaké další kroky jsou vůbec možné.
 
 
 \subsection{Odhad 2D a jeho limitace}
 
-Tradiční metody odhadu pózy se po léta soustředily na tzv. sparse keypoints -- detekci klíčových bodů, jako jsou lokty, kolena či ramena -- které detekují jako dvojici souřadnic v daném obrázku. Přestože jsou tyto modely (např. OpenPose) rychlé a efektivní, trpí zásadním nedostatkem: ztrátou prostorové informace a tělesného objemu. Zatímco mají perfektní výsledky v laboratorních podmínkách, selhávají v reálných situacích (in-the-wild), kde jim 2D obrázek neposkytuje dost jasné informace pro detekci pozice. Mezi faktory ovlivňující přesnost výstupu patří:
+Tradiční metody odhadu pózy se po léta soustředily na tzv. sparse keypoints -- detekci klíčových bodů, jako jsou lokty, kolena či ramena -- které detekují jako dvojici souřadnic v daném obrázku. Přestože jsou tyto modely (např. OpenPose) rychlé a efektivní, trpí zásadním nedostatkem: ztrátou prostorové informace a tělesného objemu. Zatímco mají perfektní výsledky v laboratorních podmínkách, v reálných situacích (in-the-wild) často selhávají, protože 2D obraz neposkytuje dost informací pro jednoznačné určení prostorové pózy.
+
+Tato omezení jsou ještě výraznější v reálných scénách, kde se pravidelně objevují další zdroje nejednoznačnosti; nejčastější praktické faktory shrnuji v následující podsekci.
+
+\subsection{Problematika v reálných scénách (in-the-wild)}
+\label{sec:problematika-in-the-wild}
+
+Současné modely (včetně state-of-the-art přístupů) bývají v praxi nejvíce omezeny následujícími faktory:
 
 \begin{itemize}
-    \item \textbf{Zákryty (Occlusions):} Části těla zakryté předměty nebo jinými částmi těla.
-    \item \textbf{Perspektivní zkreslení:} Extrémní úhly kamery, které deformují vizuální proporce těla.
-    \item \textbf{Vizuální šum:} Volné oblečení nebo špatné světelné podmínky.
-    \item \textbf{Propletení více těl:} Situace v davu, kde není jasné, komu patří jaká část těla a jak je správně rozdělit. 
+    \item \textbf{Zákryty (occlusions):} části těla zakryté předměty, jinými lidmi nebo vlastním tělem.
+    \item \textbf{Perspektivní zkreslení:} extrémní úhly kamery, které deformují vizuální proporce těla.
+    \item \textbf{Vizuální šum:} volné oblečení, rozmazání, špatné světlo nebo kompresní artefakty.
+    \item \textbf{Propletení více těl:} scény s více osobami, kde je obtížné jednoznačně přiřadit části těla k jednotlivým lidem.
 \end{itemize}
 
 \subsection{Od 2D bodů k 3D objemu}
@@ -423,7 +449,7 @@ Další praktický problém je inicializace. U složitějších scén se optimal
     \label{fig:method-2-difficult-scene-iter-0-50}
 \end{figure}
 
-Na druhou stranu se ve velké části případů podaří ztrátu výrazně snížit: pro všechny testované obrázky optimalizace našla konfiguraci SMPL s chybou pouze v jednotkách promile vůči původní heuristické inicializaci (viz Obrázek~\ref{fig:loss-remaining-histogram}). To naznačuje, že zvolená loss funkce je „optimalizovatelná“ a umí SMPL do DensePose dat dotáhnout, pokud se algoritmus nezamotá v prvních iteracích. Zlepšená inicializace (případně silnější regularizace a omezení tvarových parametrů) by proto měla zvýšit počet úspěšných případů.
+Na druhou stranu se ve velké části případů podaří ztrátu výrazně snížit: pro všechny testované obrázky optimalizace našla konfiguraci SMPL s chybou pouze v jednotkách promile vůči původní heuristické inicializaci (viz Obrázek~\ref{fig:loss-remaining-histogram}). To naznačuje, že zvolená loss funkce je „optimalizovatelná“ a umí SMPL do DensePose dat dotáhnout, pokud se algoritmus nezamotá v prvních iteracích. Zlepšená inicializace by proto měla zvýšit počet úspěšných případů.
 
 \begin{figure}[htbp]
     \centering
