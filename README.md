@@ -7,8 +7,6 @@ DensePose provides dense 2D-to-body correspondences (per-pixel embeddings). Simo
 
 This repository accompanies the write-up for maturita exam in [`documentation/simon-bravek-mp-2026.pdf`](documentation/simon-bravek-mp-2026.pdf).
 
-The rest of 
-
 ## Requirements (minimal)
 
 Tested stack (recommended):
