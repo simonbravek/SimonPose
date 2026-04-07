@@ -48,7 +48,7 @@ Note: Detectron2/DensePose are not installed from `requirements.txt`.
 
 ## 4) Install Detectron2 + DensePose (from source)
 
-SimonPose expects Detectron2 to live under `external/detectron2/` (see `config.py`).
+simon-pose expects Detectron2 to live under `external/detectron2/` (see `config.py`).
 
 ```bash
 mkdir -p external

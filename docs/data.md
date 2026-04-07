@@ -1,6 +1,6 @@
 # Data and model files
 
-SimonPose does not ship datasets or model weights in this repository. You need to download them separately and place them into the expected paths (see `config.py`).
+simon-pose does not ship datasets or model weights in this repository. You need to download them separately and place them into the expected paths (see `config.py`).
 
 ## Expected directory layout
 

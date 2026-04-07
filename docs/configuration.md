@@ -1,6 +1,6 @@
 # Configuration
 
-SimonPose uses a single configuration file: `config.py`.
+simon-pose uses a single configuration file: `config.py`.
 
 It is intentionally simple: it defines filesystem paths to datasets, external dependencies, and model files.
 

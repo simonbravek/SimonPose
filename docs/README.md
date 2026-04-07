@@ -1,6 +1,6 @@
 # Documentation
 
-This folder contains user-facing documentation for SimonPose.
+This folder contains user-facing documentation for simon-pose.
 
 Start here:
 

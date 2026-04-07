@@ -1,4 +1,4 @@
-# Running SimonPose projects
+# Running simon-pose projects
 
 All scripts assume you run them from the repository root.
 

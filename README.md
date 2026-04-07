@@ -1,9 +1,9 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-# SimonPose
-SimonPose is a research prototype exploring how to improve monocular human pose estimation by fitting a parametric body model (SMPL) to DensePose v2 / CSE outputs.
+# simon-pose
+simon-pose is a research prototype exploring how to improve monocular human pose estimation by fitting a parametric body model (SMPL) to DensePose v2 / CSE outputs.
 
-DensePose provides dense 2D-to-body correspondences (per-pixel embeddings). SimonPose uses those correspondences to optimize SMPL parameters and produce a globally consistent 3D human mesh.
+DensePose provides dense 2D-to-body correspondences (per-pixel embeddings). simon-pose uses those correspondences to optimize SMPL parameters and produce a globally consistent 3D human mesh.
 
 This repository accompanies the write-up for maturita exam in [`documentation/simon-bravek-mp-2026.pdf`](documentation/simon-bravek-mp-2026.pdf).
 
@@ -104,10 +104,10 @@ If you use this code in academic work, please cite the accompanying report:
 
 ```bibtex
 @misc{bravek2026simonpose,
-  title        = {SimonPose},
+  title        = {simon-pose},
   author       = {Šimon Brávek},
   year         = {2026},
   institution  = {FEL CTU (fel.cvut.cz) and Johannes Kepler Grammar School (gjk.cz)},
-  howpublished = {[simon-bravek-mp-2026.pdf](https://github.com/simonbravek/SimonPose/blob/main/documentation/simon-bravek-mp-2026.pdf)}
+  howpublished = {[simon-bravek-mp-2026.pdf](https://github.com/simonbravek/simon-pose/blob/main/documentation/simon-bravek-mp-2026.pdf)}
 }
 ```
