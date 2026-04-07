@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Documentation/title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.2.8/pdfobject.min.js"></script>
+    <style>
+        .pdfobject-container { height: 95vh; border: 1rem solid rgba(0,0,0,.1); }
+    </style>
+</head>
+<body>
+
+    <div id="pdf-viewer"></div>
+
+    <script>
+        // Point this to the PDF file in your repository
+        PDFObject.embed("documantation/simon-bravek-mp-2026.pdf", "#pdf-viewer");
+    </script>
+    
+</body>
+</html>
