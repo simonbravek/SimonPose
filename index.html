@@ -1,20 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Documentation/title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.2.8/pdfobject.min.js"></script>
+    <title>Documentation</title>
     <style>
-        .pdfobject-container { height: 95vh; border: 1rem solid rgba(0,0,0,.1); }
+        body { margin: 0; padding: 1rem; }
+        .pdf-viewer { height: 95vh; width: 100%; border: none; }
+        .fallback { padding: 2rem; text-align: center; }
     </style>
 </head>
 <body>
-
-    <div id="pdf-viewer"></div>
-
-    <script>
-        // Point this to the PDF file in your repository
-        PDFObject.embed("documantation/simon-bravek-mp-2026.pdf", "#pdf-viewer");
-    </script>
+    <embed 
+        class="pdf-viewer"
+        src="documentation/simon-bravek-mp-2026.pdf" 
+        type="application/pdf"
+    >
+    <div class="fallback">
+        <p>PDF cannot be displayed? <a href="documentation/simon-bravek-mp-2026.pdf">Download PDF</a></p>
+    </div>
     
 </body>
 </html>
